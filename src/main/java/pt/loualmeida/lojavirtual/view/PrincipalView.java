@@ -24,10 +24,7 @@ import pt.loualmeida.lojavirtual.enums.Perfil;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.Usuario;
 import pt.loualmeida.lojavirtual.service.SegurancaService;
-import pt.loualmeida.lojavirtual.view.admin.AutoresView;
-import pt.loualmeida.lojavirtual.view.admin.ClientesView;
-import pt.loualmeida.lojavirtual.view.admin.LivrosView;
-import pt.loualmeida.lojavirtual.view.admin.VendasFeitasView;
+import pt.loualmeida.lojavirtual.view.admin.*;
 import pt.loualmeida.lojavirtual.view.cliente.CarrinhoView;
 import pt.loualmeida.lojavirtual.view.cliente.PedidosView;
 

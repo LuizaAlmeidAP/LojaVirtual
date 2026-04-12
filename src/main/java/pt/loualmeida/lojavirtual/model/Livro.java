@@ -4,6 +4,7 @@ package pt.loualmeida.lojavirtual.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
 import pt.loualmeida.lojavirtual.enums.Genero;
 
@@ -17,19 +18,25 @@ public class Livro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String titulo;
+    @Lob // <--- Indica ao banco que é um objeto grande (BLOB)
+    @Column(length = 10000000) // <--- Define um tamanho máximo (ex: 10MB)
+    @ToString.Exclude
     private byte[] capa;
-    @ManyToMany
+    @ToString.Exclude
+    @ManyToMany (fetch = FetchType.EAGER)
     @JoinTable(
             name = "livro_autor",
             joinColumns = @JoinColumn(name = "livro_id"),
             inverseJoinColumns = @JoinColumn(name = "autor_id")
     )
     private Set<Autor> autores = new HashSet<>();
+    @Column(length = 5000)
     private String sinopse;
     @Enumerated(EnumType.STRING)
     private FaixaEtaria classificacao;
     @Enumerated(EnumType.STRING)
     private Genero genero;
+    @Column(length = 2000)
     private String descricao;
     private String tags;
 

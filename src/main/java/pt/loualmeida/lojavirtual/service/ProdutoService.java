@@ -1,14 +1,18 @@
 package pt.loualmeida.lojavirtual.service;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
 import pt.loualmeida.lojavirtual.enums.Genero;
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
+import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.Autor;
 import pt.loualmeida.lojavirtual.model.Produto;
 import pt.loualmeida.lojavirtual.repository.ProdutoRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -96,4 +100,28 @@ public class ProdutoService {
         return false;
     }
 
+    public void atualizarProduto(Produto produto) throws ObjetoNaoEncontrado {
+
+        Optional<Produto> optProduto = produtoRepository.findById(produto.getId());
+        if (optProduto.isPresent()) {
+            Produto produtoExistente = optProduto.get();
+            produtoExistente.setLivro(produto.getLivro());
+            produtoExistente.setValor(produto.getValor());
+            produtoExistente.setEstoque(produto.getEstoque());
+            produtoRepository.save(produto);
+        }
+        else{
+            throw new ObjetoNaoEncontrado(String.format("Produto %d não encontrado", produto.getId()));
+        }
+
+
+    }
+
+    public List<Produto> buscarTodosProdutos(String campoDeOrdenacao) {
+        return produtoRepository.findAll(Sort.by(campoDeOrdenacao));
+    }
+
+    public Set<Produto> buscarProdutoPorTitulo(String titulo) {
+        return produtoRepository.findByLivroTituloContainingIgnoreCase(titulo);
+    }
 }

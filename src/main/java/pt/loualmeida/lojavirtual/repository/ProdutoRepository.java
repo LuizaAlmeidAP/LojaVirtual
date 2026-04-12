@@ -29,4 +29,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     Set<Produto> findByLivroAutor(Long autorID);
 
     Set<Produto> findByLivroClassificacao(FaixaEtaria classificacao);
+
+    Set<Produto> findByLivroTituloContainingIgnoreCase(String titulo);
 }

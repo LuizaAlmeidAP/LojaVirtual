@@ -274,7 +274,7 @@ public class LivroServiceTest {
     public void buscarLivroPorTituloComSucesso() {
         Autor novoAutor = instanciarAutor();
         Livro novoLivro = instanciarLivro(novoAutor);
-        when(livroRepository.findByTitulo(any(String.class))).thenReturn(Set.of(novoLivro));
+        when(livroRepository.findByTituloContainingIgnoreCase(any(String.class))).thenReturn(Set.of(novoLivro));
         try {
             Collection<Livro> livros = livroService.buscarLivroPorTitulo("Percy Jackson e os Olimpianos: O Ladrão de Raios");
             assertNotNull(livros);

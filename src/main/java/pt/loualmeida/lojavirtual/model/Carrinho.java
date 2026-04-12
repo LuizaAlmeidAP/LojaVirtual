@@ -22,15 +22,15 @@ public class Carrinho {
             inverseJoinColumns = @JoinColumn(name = "produto_id")
     )
     private List<Produto> produtos;
-    private BigDecimal total;
+    private Double total;
     @OneToOne(cascade = CascadeType.ALL)
     private Cliente cliente;
     private LocalDateTime criacao;
 
-    public BigDecimal getTotal() {
-        total = BigDecimal.ZERO;
+    public Double getTotal() {
+        total = 0.0;
         for (Produto produto : produtos) {
-            total = total.add(produto.getValor());
+            total += produto.getValor();
         }
         return total;
     }

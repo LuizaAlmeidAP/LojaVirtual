@@ -7,12 +7,13 @@ import pt.loualmeida.lojavirtual.model.Autor;
 import pt.loualmeida.lojavirtual.model.Livro;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
 
-    Set<Livro> findByTitulo(String titulo);
+
 
     Set<Livro> findByGenero(Genero genero);
 
@@ -22,4 +23,6 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
 
 
     boolean existsByTituloAndAutoresAndGenero(String titulo, Set<Autor> autores, Genero genero);
+
+    Set<Livro> findByTituloContainingIgnoreCase(String titulo);
 }

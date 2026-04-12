@@ -1,5 +1,6 @@
 package pt.loualmeida.lojavirtual.service;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
 import pt.loualmeida.lojavirtual.enums.Genero;
@@ -93,17 +94,21 @@ public class LivroService {
     }
 
 
-    public Set<Livro> buscarLivroPorTitulo(String titulo) throws ObjetoNaoEncontrado {
-        return livroRepository.findByTitulo(titulo);
+    public Set<Livro> buscarLivroPorTitulo(String titulo) {
+        return livroRepository.findByTituloContainingIgnoreCase(titulo);
+    }
+
+    public List<Livro> buscarTodosLivros(String campoDeOrdenacao) {
+        return livroRepository.findAll(Sort.by(campoDeOrdenacao));
     }
 
 
-    public Set<Livro> buscarLivroPorGenero(Genero genero) throws ObjetoNaoEncontrado {
+    public Set<Livro> buscarLivroPorGenero(Genero genero)  {
         return livroRepository.findByGenero(genero);
     }
 
 
-    public Set<Livro> buscarLivroPorClassificacao(FaixaEtaria classificacao) throws ObjetoNaoEncontrado {
+    public Set<Livro> buscarLivroPorClassificacao(FaixaEtaria classificacao){
         return livroRepository.findByClassificacao(classificacao);
     }
 
@@ -118,4 +123,21 @@ public class LivroService {
     }
 
 
+    public void atualizarLivro(Livro livro) throws ObjetoNaoEncontrado {
+        Optional<Livro> optLivro = livroRepository.findById(livro.getId());
+        if (optLivro.isPresent()) {
+            Livro livroExistente = optLivro.get();
+            livroExistente.setGenero(livro.getGenero());
+            livroExistente.setClassificacao(livro.getClassificacao());
+            livroExistente.setDescricao(livro.getDescricao());
+            livroExistente.setSinopse(livro.getSinopse());
+            livroExistente.setCapa(livro.getCapa());
+            livroRepository.save(livro);
+        }
+        else{
+            throw new ObjetoNaoEncontrado(String.format("Livro %d não encontrado", livro.getId()));
+        }
+
+
+    }
 }
