@@ -23,6 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
@@ -44,10 +45,12 @@ import pt.loualmeida.lojavirtual.repository.ProdutoRepository;
 import pt.loualmeida.lojavirtual.service.AutorService;
 import pt.loualmeida.lojavirtual.service.LivroService;
 import pt.loualmeida.lojavirtual.service.ProdutoService;
+import pt.loualmeida.lojavirtual.view.DialogoView;
 import pt.loualmeida.lojavirtual.view.Notificacoes;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
 import java.io.ByteArrayInputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,12 +99,22 @@ public class ProdutosView extends VerticalLayout {
         addAutorBtn.addClickListener(e -> {
             abrirDialogoCadastro(null);
         });
+        Button addSalvarBtn = new Button("Salvar alterações");
+        addSalvarBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addSalvarBtn.addClickListener(e -> {
+            salvarAlteracoes();
+        });
 
-        HorizontalLayout toolbar = new HorizontalLayout(filterText, addAutorBtn);
+        HorizontalLayout toolbar = new HorizontalLayout(filterText, addAutorBtn,addSalvarBtn);
         toolbar.addClassName("toolbar");
         return toolbar;
     }
 
+    private void salvarAlteracoes() {
+        produtoService.atualizarProdutos(grid.getDataProvider().fetch(new Query<>()).collect(Collectors.toList()));
+        DialogoView.sucesso("Estoque atualizado com sucesso!");
+
+    }
 
 
     private void configureGrid() {
@@ -154,35 +167,32 @@ public class ProdutosView extends VerticalLayout {
         grid.addColumn(Produto::getValor).setHeader("Valor").setSortable(true);
 
 
-        IntegerField estoqueField = new IntegerField();
-        grid.addColumn(new ComponentRenderer<> (produto -> {
 
-            estoqueField.setMaxWidth(120, Unit.PIXELS);
+        grid.addColumn(new ComponentRenderer<> (produto -> {
+            IntegerField estoqueField = new IntegerField();
+            estoqueField.setMaxWidth(150, Unit.PIXELS);
             estoqueField.setMin(0);
             estoqueField.setStep(1);
             estoqueField.setValue(produto.getEstoque());
+            grid.addItemDoubleClickListener(item -> {
+                estoqueField.setStepButtonsVisible(true);
+                grid.getEditor().editItem(item.getItem());
+                estoqueField.focus();
+            });
             estoqueField.addValueChangeListener(e -> {
                 if(e.getValue() != null) {
                     produto.setEstoque(e.getValue());
                 }
+
             });
 
             return estoqueField;
         })).setHeader("Estoque");
 
-        Binder<Produto> binder = new Binder<>(Produto.class);
 
-        binder.forField(estoqueField)
-                .asRequired("O estoque é obrigatório")
-                .bind(Produto::getEstoque, Produto::setEstoque);
 
-        grid.getEditor().setBinder(binder);
-        grid.getEditor().setBuffered(true);
-        grid.addItemDoubleClickListener(item -> {
-            estoqueField.setStepButtonsVisible(true);
-            grid.getEditor().editItem(item.getItem());
-            estoqueField.focus();
-        });
+
+
 
         grid.addComponentColumn(produto -> {
             Button btnProduto = new Button(VaadinIcon.BOOK.create());

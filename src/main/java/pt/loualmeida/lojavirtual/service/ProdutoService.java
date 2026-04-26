@@ -124,4 +124,9 @@ public class ProdutoService {
     public Set<Produto> buscarProdutoPorTitulo(String titulo) {
         return produtoRepository.findByLivroTituloContainingIgnoreCase(titulo);
     }
+
+    public void atualizarProdutos(List<Produto> produtos) {
+        for(Produto produto: produtos) System.out.println(produto.getLivro().getTitulo() + " " + produto.getEstoque());
+        produtoRepository.saveAll(produtos);
+    }
 }
