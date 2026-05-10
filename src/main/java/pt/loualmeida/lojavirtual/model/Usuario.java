@@ -15,7 +15,8 @@ public class Usuario {
     private String email;
     private String nome;
     public String senha;
-    private byte[] imagem;
+    private byte[] foto;
     @Enumerated(EnumType.STRING)
     private Perfil perfil;
+    private boolean ativo;
 }

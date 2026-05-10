@@ -17,5 +17,7 @@ public class Cliente {
     private Usuario usuario;
     private String documento;
     private LocalDate nascimento;
-    private byte[] imagem;
+    private boolean ativo;
+    private String motivoExclusao;
+
 }

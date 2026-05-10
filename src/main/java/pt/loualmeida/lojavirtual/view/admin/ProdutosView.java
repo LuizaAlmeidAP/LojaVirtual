@@ -4,23 +4,23 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextArea;
+
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.Upload;
+
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.provider.Query;
@@ -29,20 +29,15 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
-import com.vaadin.flow.server.streams.InMemoryUploadHandler;
-import com.vaadin.flow.server.streams.UploadHandler;
+
 import jakarta.annotation.security.RolesAllowed;
-import pt.loualmeida.lojavirtual.enums.Categoria;
-import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
-import pt.loualmeida.lojavirtual.enums.Genero;
+
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.Autor;
 import pt.loualmeida.lojavirtual.model.Livro;
 import pt.loualmeida.lojavirtual.model.Produto;
-import pt.loualmeida.lojavirtual.repository.LivroRepository;
-import pt.loualmeida.lojavirtual.repository.ProdutoRepository;
-import pt.loualmeida.lojavirtual.service.AutorService;
+
 import pt.loualmeida.lojavirtual.service.LivroService;
 import pt.loualmeida.lojavirtual.service.ProdutoService;
 import pt.loualmeida.lojavirtual.view.DialogoView;
@@ -50,9 +45,10 @@ import pt.loualmeida.lojavirtual.view.Notificacoes;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
 import java.io.ByteArrayInputStream;
-import java.util.Collection;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Route(value = "produtos", layout = PrincipalView.class)
 @RolesAllowed("ADMINISTRADOR")
@@ -62,12 +58,11 @@ public class ProdutosView extends VerticalLayout {
     private final Grid<Produto> grid = new Grid<>(Produto.class, false);
     private final TextField filterText = new TextField();
     private final LivroService livroService;
-    private final ProdutoRepository produtoRepository;
 
-    public ProdutosView(ProdutoService produtoService, LivroService livroService, ProdutoRepository produtoRepository) throws ObjetoNaoEncontrado {
+
+    public ProdutosView(ProdutoService produtoService, LivroService livroService) throws ObjetoNaoEncontrado {
         this.produtoService = produtoService;
         this.livroService = livroService;
-        this.produtoRepository = produtoRepository;
         setSizeFull();
         configureGrid();
 

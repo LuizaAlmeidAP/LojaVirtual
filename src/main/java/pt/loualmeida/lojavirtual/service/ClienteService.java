@@ -1,24 +1,30 @@
 package pt.loualmeida.lojavirtual.service;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pt.loualmeida.lojavirtual.enums.Perfil;
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
+import pt.loualmeida.lojavirtual.model.Autor;
 import pt.loualmeida.lojavirtual.model.Cliente;
 import pt.loualmeida.lojavirtual.model.Usuario;
 import pt.loualmeida.lojavirtual.repository.ClienteRepository;
+import pt.loualmeida.lojavirtual.repository.UsuarioRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ClienteService {
+    private final UsuarioRepository usuarioRepository;
     private ClienteRepository clienteRepository;
     private UsuarioService usuarioService;
 
-    public ClienteService(ClienteRepository clienteRepository, UsuarioService usuarioService) {
+    public ClienteService(ClienteRepository clienteRepository, UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
 
         this.clienteRepository = clienteRepository;
         this.usuarioService = usuarioService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     /*
@@ -31,6 +37,7 @@ public class ClienteService {
 
     public Cliente cadastrarCliente(Cliente cliente) throws DadosInvalidosException {
         validarCliente(cliente);
+        cliente.setAtivo(true);
         return clienteRepository.save(cliente);
 
     }
@@ -49,10 +56,11 @@ public class ClienteService {
         if (Perfil.ADMINISTRADOR.equals(cliente.getUsuario().getPerfil())) {
             throw new DadosInvalidosException("Tipo de perfil invalido.");
         }
+
     }
 
 
-    public void excluirCliente(Long clienteID) throws ObjetoNaoEncontrado {
+    public void excluirCliente(Long clienteID, String motivo) throws ObjetoNaoEncontrado {
         Optional<Cliente> optCliente = clienteRepository.findById(clienteID);
 
         if (optCliente.isEmpty()) {
@@ -60,9 +68,21 @@ public class ClienteService {
         }
         Cliente cliente = optCliente.get();
         Usuario usuario = cliente.getUsuario();
-        usuarioService.excluirUsuario(usuario.getId());
-        clienteRepository.delete(cliente);
+        cliente.setMotivoExclusao(motivo);
+        cliente.setAtivo(false);
+        usuario.setAtivo(false);
+        usuarioRepository.save(usuario);
+        clienteRepository.save(cliente);
     }
 
+
+    public List<Cliente> buscarClientePorNome(String campoDeOrdenacao) {
+        return clienteRepository.findAll(Sort.by(campoDeOrdenacao));
+
+    }
+
+    public List<Cliente> buscarTodosCliente(String nome) {
+        return clienteRepository.findByNomeContainingIgnoreCase(nome);
+    }
 
 }

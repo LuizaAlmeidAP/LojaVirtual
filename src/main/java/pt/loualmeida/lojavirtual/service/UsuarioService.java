@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
+import pt.loualmeida.lojavirtual.exception.UsuarioInativoException;
 import pt.loualmeida.lojavirtual.model.Usuario;
 import pt.loualmeida.lojavirtual.repository.UsuarioRepository;
 
@@ -34,6 +35,7 @@ public class UsuarioService implements UserDetailsService {
     public Usuario cadastrarUsuario(Usuario usuario) throws DadosInvalidosException {
         validarUsuario(usuario);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        usuario.setAtivo(true);
         return usuarioRepository.save(usuario);
     }
 
@@ -64,7 +66,8 @@ public class UsuarioService implements UserDetailsService {
             throw new ObjetoNaoEncontrado(String.format("Usuário %d não encontrado", usuarioID));
         }
         Usuario usuario = optUsuario.get();
-        usuarioRepository.delete(usuario);
+        usuario.setAtivo(false);
+        usuarioRepository.save(usuario);
     }
 
 
@@ -81,6 +84,9 @@ public class UsuarioService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
             Usuario usuario = buscarUsuarioPorEmail(username);
+            if(!usuario.isAtivo()) {
+                throw new UsuarioInativoException(String.format("O usuário %s está inativo", username));
+            }
             return User.builder()
                     .username(usuario.getEmail())
                     .password(usuario.getSenha())
