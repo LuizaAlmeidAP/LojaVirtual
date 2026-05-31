@@ -10,6 +10,7 @@ import pt.loualmeida.lojavirtual.model.Cliente;
 import pt.loualmeida.lojavirtual.model.Usuario;
 import pt.loualmeida.lojavirtual.repository.ClienteRepository;
 import pt.loualmeida.lojavirtual.repository.UsuarioRepository;
+import pt.loualmeida.lojavirtual.view.DialogoView;
 
 import java.util.List;
 import java.util.Optional;
@@ -73,16 +74,18 @@ public class ClienteService {
         usuario.setAtivo(false);
         usuarioRepository.save(usuario);
         clienteRepository.save(cliente);
-    }
-
-
-    public List<Cliente> buscarClientePorNome(String campoDeOrdenacao) {
-        return clienteRepository.findAll(Sort.by(campoDeOrdenacao));
 
     }
 
-    public List<Cliente> buscarTodosCliente(String nome) {
-        return clienteRepository.findByNomeContainingIgnoreCase(nome);
+
+    public List<Cliente> buscarClientePorNome(String nome) {
+        return clienteRepository.findByAtivoAndUsuarioNomeContainingIgnoreCase(true,nome);
+
+    }
+
+    public List<Cliente> buscarTodosCliente(String campoDeOrdenacao) {
+
+        return clienteRepository.findByAtivo(true, Sort.by(campoDeOrdenacao));
     }
 
 }

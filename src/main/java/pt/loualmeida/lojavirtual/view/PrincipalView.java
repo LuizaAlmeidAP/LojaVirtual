@@ -26,6 +26,7 @@ import pt.loualmeida.lojavirtual.model.Usuario;
 import pt.loualmeida.lojavirtual.service.SegurancaService;
 import pt.loualmeida.lojavirtual.view.admin.*;
 import pt.loualmeida.lojavirtual.view.cliente.CarrinhoView;
+import pt.loualmeida.lojavirtual.view.cliente.CatalogoView;
 import pt.loualmeida.lojavirtual.view.cliente.PedidosView;
 
 @Route("")
@@ -138,7 +139,7 @@ public class PrincipalView extends AppLayout {
     }
 
     private void buildClientMenu(SideNav nav) {
-        SideNavItem produtosLink = new SideNavItem("Produtos", ProdutosView.class, VaadinIcon.PACKAGE.create());
+        SideNavItem produtosLink = new SideNavItem("Produtos", CatalogoView.class, VaadinIcon.PACKAGE.create());
         SideNavItem pedidosLink = new SideNavItem("Meus Pedidos", PedidosView.class, VaadinIcon.MONEY.create());
         SideNavItem configuracoesLink = new SideNavItem("Configurações", ConfiguracoesView.class, VaadinIcon.COG.create());
 

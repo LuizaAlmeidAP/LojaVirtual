@@ -84,7 +84,7 @@ public class UsuarioService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
             Usuario usuario = buscarUsuarioPorEmail(username);
-            if(!usuario.isAtivo()) {
+            if(!usuario.getAtivo()) {
                 throw new UsuarioInativoException(String.format("O usuário %s está inativo", username));
             }
             return User.builder()

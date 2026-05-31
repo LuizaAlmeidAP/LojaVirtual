@@ -18,5 +18,5 @@ public class Usuario {
     private byte[] foto;
     @Enumerated(EnumType.STRING)
     private Perfil perfil;
-    private boolean ativo;
+    private Boolean ativo;
 }

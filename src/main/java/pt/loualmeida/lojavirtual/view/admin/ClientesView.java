@@ -36,6 +36,7 @@ import pt.loualmeida.lojavirtual.model.Cliente;
 import pt.loualmeida.lojavirtual.repository.ClienteRepository;
 import pt.loualmeida.lojavirtual.service.AutorService;
 import pt.loualmeida.lojavirtual.service.ClienteService;
+import pt.loualmeida.lojavirtual.view.DialogoView;
 import pt.loualmeida.lojavirtual.view.Notificacoes;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
@@ -53,9 +54,9 @@ public class ClientesView extends VerticalLayout {
     private final ClienteService clienteService;
     private final Grid<Cliente> grid = new Grid<>(Cliente.class, false);
     private final TextField filterText = new TextField();
-    private final ClienteRepository clienteRepository;
 
-    public ClientesView(ClienteService clienteService, ClienteRepository clienteRepository) {
+
+    public ClientesView(ClienteService clienteService) {
         this.clienteService = clienteService;
 
         setSizeFull();
@@ -68,7 +69,7 @@ public class ClientesView extends VerticalLayout {
 
         // Carrega dados iniciais
         atualizarLista();
-        this.clienteRepository = clienteRepository;
+
     }
 
     private HorizontalLayout getToolbar() {
@@ -163,16 +164,17 @@ public class ClientesView extends VerticalLayout {
         dialogLayout.setSpacing(true);
         dialogLayout.setPadding(false);
         dialogLayout.getStyle().set("width", "400px"); // Largura fixa para ficar bonito
-
+        dialogLayout.add(nomeCliente, emailCliente, motivoCliente);
         dialog.add(dialogLayout);
         Button btnSalvar = new Button("Salvar", e -> {
             try{
                 clienteService.excluirCliente(cliente.getId(), motivoCliente.getValue());
-
+                DialogoView.sucesso(String.format("Cliente %s excluido com sucesso!", cliente.getUsuario().getNome()));
             }
-            catch (ObjetoNaoEncontrado e){
-
+            catch (ObjetoNaoEncontrado ex){
+                DialogoView.erro(String.format("Cliente %d não encontrado", cliente.getId()));
             }
+            dialog.close();
         });
         btnSalvar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
@@ -189,7 +191,7 @@ public class ClientesView extends VerticalLayout {
 
     private void atualizarLista() {
         if (filterText.isEmpty()) {
-            grid.setItems(clienteService.buscarTodosCliente("nome"));
+            grid.setItems(clienteService.buscarTodosCliente("usuario.nome"));
         } else {
             grid.setItems(clienteService.buscarClientePorNome(filterText.getValue()));
         }

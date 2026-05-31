@@ -17,7 +17,7 @@ public class Cliente {
     private Usuario usuario;
     private String documento;
     private LocalDate nascimento;
-    private boolean ativo;
+    private Boolean ativo;
     private String motivoExclusao;
 
 }
