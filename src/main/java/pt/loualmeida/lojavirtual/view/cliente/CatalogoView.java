@@ -5,12 +5,18 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
@@ -18,9 +24,13 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import jakarta.annotation.security.RolesAllowed;
+import pt.loualmeida.lojavirtual.enums.Categoria;
+import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
+import pt.loualmeida.lojavirtual.enums.Genero;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.Autor;
 import pt.loualmeida.lojavirtual.model.Produto;
+import pt.loualmeida.lojavirtual.service.AutorService;
 import pt.loualmeida.lojavirtual.service.ProdutoService;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
@@ -39,10 +49,12 @@ public class CatalogoView extends VerticalLayout {
     private final ProdutoService produtoService;
     private final TextField filterText = new TextField();
     private final Div containerProdutos = new Div();
+    private final AutorService autorService;
 
 
-    public CatalogoView(ProdutoService produtoService) {
+    public CatalogoView(ProdutoService produtoService, AutorService autorService) {
         this.produtoService = produtoService;
+        this.autorService = autorService;
 
 
         inicializaView();
@@ -53,24 +65,87 @@ public class CatalogoView extends VerticalLayout {
 
 
     private HorizontalLayout getToolbar() {
+        //SINGULAR, PLURAL E ACENTUAÇÃO
         filterText.setPlaceholder("Filtrar por titulo...");
+        filterText.setWidth("100%");
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
         filterText.addValueChangeListener(e -> {
-            try {
-                atualizarLista();
-            } catch (ObjetoNaoEncontrado ex) {
-                throw new RuntimeException(ex);
-            }
+
+                atualizarLista(null);
+
         });
 
-        HorizontalLayout toolbar = new HorizontalLayout(filterText);
+
+        ComboBox<Autor> filtroAutor = new ComboBox<>("Autor");
+        List<Autor> listaAutores = autorService.buscarTodosAutores("nome");
+        filtroAutor.setItems(listaAutores);
+        filtroAutor.setItemLabelGenerator(Autor::getNome);
+
+
+        ComboBox<Categoria> filtroCategoria = new ComboBox<>("Categoria");
+        filtroCategoria.setItems(Categoria.values());
+        filtroCategoria.setItemLabelGenerator(Categoria::getTitulo);
+        ComboBox<Genero> filtroGenero = new ComboBox<>("Gênero");
+        filtroGenero.setEnabled(false);
+        filtroCategoria.addValueChangeListener(e -> {
+            Categoria categoriaEscolhida = e.getValue();
+            List<Genero> listaDeGenero = Genero.getGenerosDaCategoria(categoriaEscolhida);
+            filtroGenero.setItems(listaDeGenero);
+            filtroGenero.setItemLabelGenerator(Genero::getTitulo);
+            filtroGenero.setEnabled(true);
+        });
+        ComboBox<FaixaEtaria> filtroFaixaEtaria = new ComboBox<>("Faixa Etaria");
+        filtroFaixaEtaria.setItems(FaixaEtaria.values());
+        filtroFaixaEtaria.setItemLabelGenerator(FaixaEtaria::getTitulo);
+        NumberField filtroMinimo = new NumberField("Preço mínimo");
+        NumberField filtroMaximo = new NumberField("Preço máximo");
+
+
+        Button btnAplicarFiltros = new Button("Aplicar Filtros");
+
+        // Ação do botão de filtros (Exemplo)
+        btnAplicarFiltros.addClickListener(e -> {
+
+            List<Produto> produtosFiltrados = produtoService.filtraProdutos(filterText.getValue(), filtroAutor.getValue().getNome(),
+                   filtroCategoria.getValue(), filtroGenero.getValue(), filtroFaixaEtaria.getValue(),
+                    (filtroMinimo.getValue() == null) ? null : filtroMinimo.getValue(),
+                    (filtroMaximo.getValue() == null) ? null : filtroMaximo.getValue());
+            atualizarLista(produtosFiltrados);
+        }
+
+        );
+
+        // 3. Agrupando os filtros adicionais em um layout
+        HorizontalLayout layoutFiltrosExtras = new HorizontalLayout(filtroAutor ,filtroCategoria, filtroGenero, filtroFaixaEtaria, filtroMinimo, filtroMaximo, btnAplicarFiltros);
+        layoutFiltrosExtras.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
+        layoutFiltrosExtras.getStyle().set("flex-wrap", "wrap"); // Para responsividade
+
+        // 4. Área Expansível (Details)
+        // O Vaadin Details cria a aba que o usuário clica para abrir/fechar
+        Details areaFiltrosAvancados = new Details("Filtros Avançados", layoutFiltrosExtras);
+        areaFiltrosAvancados.setOpened(false); // Garante que a área comece FECHADA
+
+
+
+
+        setSizeFull();
+
+
+        HorizontalLayout toolbar = new HorizontalLayout(filterText, areaFiltrosAvancados);
         toolbar.addClassName("toolbar");
         return toolbar;
     }
 
-    private void atualizarLista() throws ObjetoNaoEncontrado {
-        if (filterText.isEmpty()) {
+    private void atualizarLista(List<Produto> produtosFiltrados) {
+        containerProdutos.removeAll();
+        if(produtosFiltrados != null && !produtosFiltrados.isEmpty()) {
+            produtosFiltrados.forEach(produto -> {
+                containerProdutos.add(criarCardProduto(produto));
+            });
+
+        }
+        else if (filterText.isEmpty()) {
             List<Produto> produtos = produtoService.buscarTodosProdutos("livro.titulo");
             produtos.forEach(produto -> {
                 containerProdutos.add(criarCardProduto(produto));
@@ -94,8 +169,9 @@ public class CatalogoView extends VerticalLayout {
         containerProdutos.setWidthFull();
 
 
-
+        atualizarLista(null);
         HorizontalLayout toolbar = getToolbar();
+
 
         add(toolbar, containerProdutos);
     }

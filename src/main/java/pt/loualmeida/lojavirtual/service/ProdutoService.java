@@ -1,7 +1,9 @@
 package pt.loualmeida.lojavirtual.service;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import pt.loualmeida.lojavirtual.enums.Categoria;
 import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
 import pt.loualmeida.lojavirtual.enums.Genero;
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
@@ -9,6 +11,7 @@ import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.Autor;
 import pt.loualmeida.lojavirtual.model.Produto;
 import pt.loualmeida.lojavirtual.repository.ProdutoRepository;
+import pt.loualmeida.lojavirtual.repository.ProdutoSpec;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -71,6 +74,22 @@ public class ProdutoService {
             valorFinal = new BigDecimal(Integer.MAX_VALUE);
         }
         return produtoRepository.findByValorBetween(valorInicial, valorFinal);
+
+
+    }
+
+    public List<Produto> filtraProdutos(String titulo, String autor,Categoria categoria, Genero genero, FaixaEtaria faixaEtaria, Double minimo, Double maximo)  {
+        Specification<Produto> spec = Specification.allOf(
+                ProdutoSpec.tituloContem(titulo),
+                ProdutoSpec.autorContem(autor),
+                ProdutoSpec.categoriaIgual(categoria),
+                ProdutoSpec.generoIgual(genero),
+                ProdutoSpec.faixaEtariaIgual(faixaEtaria),
+                ProdutoSpec.precoMenorQue(maximo),
+                ProdutoSpec.precoMaiorQue(minimo)
+        );
+
+        return produtoRepository.findAll(spec);
 
 
     }

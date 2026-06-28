@@ -1,6 +1,7 @@
 package pt.loualmeida.lojavirtual.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
 import pt.loualmeida.lojavirtual.enums.Genero;
@@ -11,13 +12,9 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 
-public interface ProdutoRepository extends JpaRepository<Produto, Long> {
+public interface ProdutoRepository extends JpaRepository<Produto, Long>, JpaSpecificationExecutor<Produto> {
 
     boolean existsByLivro(Livro livro);
-
-
-
-
 
     Set<Produto> findByValorBetween(BigDecimal valorInicial, BigDecimal valorFinal);
 
