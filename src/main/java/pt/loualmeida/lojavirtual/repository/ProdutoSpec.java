@@ -31,8 +31,12 @@ public class ProdutoSpec {
             if (autor == null || autor.trim().isEmpty()) {
                 return null;
             }
+            // Ao pesquisar por coleções precisamos fazer join e marcar distinct para evitar duplicatas
+            query.distinct(true);
+            jakarta.persistence.criteria.Join<?,?> livroJoin = root.join("livro");
+            jakarta.persistence.criteria.Join<?,?> autorJoin = livroJoin.join("autores");
             return builder.like(
-                    builder.lower(root.get("livro").get("autores")),
+                    builder.lower(autorJoin.get("nome")),
                     "%" + autor.toLowerCase() + "%"
             );
 

@@ -24,6 +24,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import jakarta.annotation.security.RolesAllowed;
+import org.slf4j.Logger;
 import pt.loualmeida.lojavirtual.enums.Categoria;
 import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
 import pt.loualmeida.lojavirtual.enums.Genero;
@@ -46,6 +47,9 @@ import java.util.stream.Collectors;
 @RolesAllowed("CLIENTE")
 @PageTitle("Catalogo de Produtos")
 public class CatalogoView extends VerticalLayout {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(CatalogoView.class);
+
     private final ProdutoService produtoService;
     private final TextField filterText = new TextField();
     private final Div containerProdutos = new Div();
@@ -107,11 +111,15 @@ public class CatalogoView extends VerticalLayout {
         // Ação do botão de filtros (Exemplo)
         btnAplicarFiltros.addClickListener(e -> {
 
-            List<Produto> produtosFiltrados = produtoService.filtraProdutos(filterText.getValue(), filtroAutor.getValue().getNome(),
-                   filtroCategoria.getValue(), filtroGenero.getValue(), filtroFaixaEtaria.getValue(),
-                    (filtroMinimo.getValue() == null) ? null : filtroMinimo.getValue(),
-                    (filtroMaximo.getValue() == null) ? null : filtroMaximo.getValue());
-            atualizarLista(produtosFiltrados);
+            try {
+                List<Produto> produtosFiltrados = produtoService.filtraProdutos(filterText.getValue(), filtroAutor.getValue().getNome(),
+                        filtroCategoria.getValue(), filtroGenero.getValue(), filtroFaixaEtaria.getValue(),
+                        (filtroMinimo.getValue() == null) ? null : filtroMinimo.getValue(),
+                        (filtroMaximo.getValue() == null) ? null : filtroMaximo.getValue());
+                atualizarLista(produtosFiltrados);
+            } catch (Exception ex) {
+                logger.error("Erro ao aplicar filtros: ", ex);
+            }
         }
 
         );
