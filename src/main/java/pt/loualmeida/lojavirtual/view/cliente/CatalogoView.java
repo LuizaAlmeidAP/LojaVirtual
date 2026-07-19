@@ -274,7 +274,7 @@ public class CatalogoView extends VerticalLayout {
         Button adicionarCarrinho = new Button("Adicionar carrinho", VaadinIcon.CART.create(), event -> {
             try {
                 adicionarAoCarrinho(produto);
-            } catch (ObjetoNaoEncontrado e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
