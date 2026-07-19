@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,6 +34,13 @@ public class Carrinho {
             total += produto.getValor();
         }
         return total;
+    }
+
+    public void adicionarProduto(Produto produto) {
+        if(produtos == null){
+            produtos = new ArrayList<Produto>();
+        }
+        produtos.add(produto);
     }
 
 

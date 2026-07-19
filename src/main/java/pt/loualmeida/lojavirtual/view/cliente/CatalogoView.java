@@ -5,14 +5,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.charts.model.Label;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -28,18 +27,16 @@ import org.slf4j.Logger;
 import pt.loualmeida.lojavirtual.enums.Categoria;
 import pt.loualmeida.lojavirtual.enums.FaixaEtaria;
 import pt.loualmeida.lojavirtual.enums.Genero;
+import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
-import pt.loualmeida.lojavirtual.model.Autor;
-import pt.loualmeida.lojavirtual.model.Produto;
-import pt.loualmeida.lojavirtual.service.AutorService;
-import pt.loualmeida.lojavirtual.service.ProdutoService;
+import pt.loualmeida.lojavirtual.model.*;
+import pt.loualmeida.lojavirtual.service.*;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
 import java.io.ByteArrayInputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -54,11 +51,19 @@ public class CatalogoView extends VerticalLayout {
     private final TextField filterText = new TextField();
     private final Div containerProdutos = new Div();
     private final AutorService autorService;
+    private final CarrinhoService carrinhoService;
+    private final SegurancaService segurancaService;
+    private final ClienteService clienteService;
 
 
-    public CatalogoView(ProdutoService produtoService, AutorService autorService) {
+    public CatalogoView(ProdutoService produtoService, AutorService autorService,
+                        CarrinhoService carrinhoService, SegurancaService segurancaService,
+                        ClienteService clienteService) {
         this.produtoService = produtoService;
         this.autorService = autorService;
+        this.carrinhoService = carrinhoService;
+        this.segurancaService = segurancaService;
+        this.clienteService = clienteService;
 
 
         inicializaView();
@@ -76,7 +81,7 @@ public class CatalogoView extends VerticalLayout {
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
         filterText.addValueChangeListener(e -> {
 
-                atualizarLista(null);
+                atualizarLista(null, false);
 
         });
 
@@ -116,7 +121,7 @@ public class CatalogoView extends VerticalLayout {
                         filtroCategoria.getValue(), filtroGenero.getValue(), filtroFaixaEtaria.getValue(),
                         (filtroMinimo.getValue() == null) ? null : filtroMinimo.getValue(),
                         (filtroMaximo.getValue() == null) ? null : filtroMaximo.getValue());
-                atualizarLista(produtosFiltrados);
+                atualizarLista(produtosFiltrados, true);
             } catch (Exception ex) {
                 logger.error("Erro ao aplicar filtros: ", ex);
             }
@@ -145,7 +150,7 @@ public class CatalogoView extends VerticalLayout {
         return toolbar;
     }
 
-    private void atualizarLista(List<Produto> produtosFiltrados) {
+    private void atualizarLista(List<Produto> produtosFiltrados, boolean temFiltro) {
         containerProdutos.removeAll();
         if(produtosFiltrados != null && !produtosFiltrados.isEmpty()) {
             produtosFiltrados.forEach(produto -> {
@@ -153,18 +158,21 @@ public class CatalogoView extends VerticalLayout {
             });
 
         }
-        else if (filterText.isEmpty()) {
+        else if (filterText.isEmpty()&&!temFiltro) {
             List<Produto> produtos = produtoService.buscarTodosProdutos("livro.titulo");
             produtos.forEach(produto -> {
                 containerProdutos.add(criarCardProduto(produto));
             });
 
-        } else {
+        } else if(!temFiltro) {
             Set<Produto> produtos = produtoService.buscarProdutoPorTitulo(filterText.getValue());
             produtos.forEach(produto -> {
                 containerProdutos.add(criarCardProduto(produto));
             });
 
+        }
+        else{
+            add(new Span("Nenhum produto encontrado para o filtro informado."));
         }
     }
 
@@ -177,7 +185,7 @@ public class CatalogoView extends VerticalLayout {
         containerProdutos.setWidthFull();
 
 
-        atualizarLista(null);
+        atualizarLista(null, false);
         HorizontalLayout toolbar = getToolbar();
 
 
@@ -191,6 +199,8 @@ public class CatalogoView extends VerticalLayout {
         setJustifyContentMode(JustifyContentMode.START);
         setAlignItems(Alignment.CENTER);
     }
+
+
 
     private Component criarCardProduto(Produto produto) {
         VerticalLayout card = new VerticalLayout();
@@ -258,16 +268,40 @@ public class CatalogoView extends VerticalLayout {
         preco.getStyle().set("color", "green");
 
 
-        Button detalhes = new Button("Ver detalhes", event -> {
+        Button detalhes = new Button("Ver detalhes", VaadinIcon.SEARCH.create(), event -> {
             verDetalhes(produto);
         });
+        Button adicionarCarrinho = new Button("Adicionar carrinho", VaadinIcon.CART.create(), event -> {
+            try {
+                adicionarAoCarrinho(produto);
+            } catch (ObjetoNaoEncontrado e) {
+                throw new RuntimeException(e);
+            }
+        });
 
-        card.add(imageContainer, nome, preco, detalhes);
+        card.add(imageContainer, nome, preco, detalhes, adicionarCarrinho);
         return card;
     }
 
     private void verDetalhes(Produto produto) {
         UI.getCurrent().navigate("produto/" + produto.getId());
     }
+    private void adicionarAoCarrinho(Produto produto) throws ObjetoNaoEncontrado, DadosInvalidosException {
+        Usuario usuario = segurancaService.getUsuarioLogado();
+        Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
+        Carrinho carrinho = carrinhoService.buscarCarrinhoPorCliente(cliente.getId());
+        if(carrinho == null) {
+            carrinho = new Carrinho();
+            carrinho.setCliente(cliente);
+            carrinho.adicionarProduto(produto);
+            carrinho = carrinhoService.cadastrarCarrinho(carrinho);
+        }
+        else {
+            carrinhoService.adicionarItens( carrinho.getId(), List.of(produto));
+        }
 
+        //Adicionar a informação dos produtos no carrinho
+
+
+    }
 }

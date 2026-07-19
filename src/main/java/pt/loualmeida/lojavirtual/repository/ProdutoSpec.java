@@ -45,7 +45,7 @@ public class ProdutoSpec {
 
     public static Specification<Produto> faixaEtariaIgual(FaixaEtaria faixaEtaria) {
         return (root, query, builder) -> {
-            // Se a categoria não foi informada, ignora este filtro
+
             if (faixaEtaria == null) {
                 return null;
             }

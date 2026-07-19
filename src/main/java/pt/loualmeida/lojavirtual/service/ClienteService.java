@@ -77,6 +77,10 @@ public class ClienteService {
 
     }
 
+    public Cliente buscarClientePorUsuario(Usuario usuario){
+        return clienteRepository.findByUsuario(usuario);
+    }
+
 
     public List<Cliente> buscarClientePorNome(String nome) {
         return clienteRepository.findByAtivoAndUsuarioNomeContainingIgnoreCase(true,nome);
