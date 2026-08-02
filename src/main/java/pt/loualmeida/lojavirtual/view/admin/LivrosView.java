@@ -60,19 +60,15 @@ public class LivrosView extends VerticalLayout {
 
     public LivrosView(LivroService livroService, AutorService autorService) throws ObjetoNaoEncontrado {
         this.livroService = livroService;
+        this.autorService = autorService;
 
         setSizeFull();
         configureGrid();
-
-        // Cria a barra de topo (Filtro + Botão)
         HorizontalLayout toolbar = getToolbar();
-
         add(toolbar, grid);
-
-        // Carrega dados iniciais
         atualizarLista();
 
-        this.autorService = autorService;
+
     }
 
     private HorizontalLayout getToolbar() {

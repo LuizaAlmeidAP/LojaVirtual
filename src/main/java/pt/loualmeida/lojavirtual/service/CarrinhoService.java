@@ -25,14 +25,6 @@ public class CarrinhoService {
 
     }
 
-    /*
-    Buscar produtos por ID
-    Adicionar e remover itens do carrinho - FEITO
-    Limpar carrinho - FEITO
-     */
-
-
-
     public Carrinho cadastrarCarrinho(Carrinho carrinho) throws DadosInvalidosException {
         validarCarrinho(carrinho);
         carrinho.setCriacao(LocalDateTime.now());
@@ -50,13 +42,13 @@ public class CarrinhoService {
         }
     }
 
-    public void adicionarItens(Long carrinhoID, List<Produto> produtos) throws ObjetoNaoEncontrado {
+    public Carrinho adicionarItens(Long carrinhoID, List<Produto> produtos) throws ObjetoNaoEncontrado {
         Optional<Carrinho> optCarrinho = carrinhoRepository.findById(carrinhoID);
         if(optCarrinho.isPresent()){
             Carrinho carrinho = optCarrinho.get();
             carrinho.getProdutos().addAll(produtos);
             carrinhoRepository.save(carrinho);
-            return;
+            return carrinho;
         }
         throw new ObjetoNaoEncontrado(String.format("O carrinho %d não foi encontrado.", carrinhoID));
     }
@@ -92,10 +84,7 @@ public class CarrinhoService {
         }
         Cliente cliente = optCliente.get();
         Optional<Carrinho> optCarrinho = carrinhoRepository.findByCliente(cliente);
-        if(optCarrinho.isPresent()){
-            return optCarrinho.get();
-        }
-        throw new ObjetoNaoEncontrado(String.format("O carrinho do cliente %d não foi encontrado.", clienteID));
+        return optCarrinho.orElse(null);
 
     }
 

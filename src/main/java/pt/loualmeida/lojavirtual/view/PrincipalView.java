@@ -21,13 +21,21 @@ import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.loualmeida.lojavirtual.enums.Perfil;
+import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
+import pt.loualmeida.lojavirtual.model.Carrinho;
+import pt.loualmeida.lojavirtual.model.Cliente;
+import pt.loualmeida.lojavirtual.model.Produto;
 import pt.loualmeida.lojavirtual.model.Usuario;
+import pt.loualmeida.lojavirtual.service.CarrinhoService;
+import pt.loualmeida.lojavirtual.service.ClienteService;
 import pt.loualmeida.lojavirtual.service.SegurancaService;
 import pt.loualmeida.lojavirtual.view.admin.*;
 import pt.loualmeida.lojavirtual.view.cliente.CarrinhoView;
 import pt.loualmeida.lojavirtual.view.cliente.CatalogoView;
 import pt.loualmeida.lojavirtual.view.cliente.PedidosView;
+
+import java.util.List;
 
 @Route("")
 @RolesAllowed({"CLIENTE", "ADMINISTRADOR"})
@@ -39,13 +47,24 @@ public class PrincipalView extends AppLayout {
 
     private final SegurancaService segurancaService;
 
-    public PrincipalView(SegurancaService segurancaService) {
+    private final CarrinhoService carrinhoService;
+
+    private final ClienteService clienteService;
+
+    private final Span quantidadeCarrinhoItens = new Span();
+
+    private int totalItens = 0;
+
+    public PrincipalView(SegurancaService segurancaService, CarrinhoService carrinhoService, ClienteService clienteService) {
         this.segurancaService = segurancaService;
+        this.carrinhoService = carrinhoService;
+        this.clienteService = clienteService;
         try {
             // Top navbar
             HorizontalLayout header = createHeader();
             addToNavbar(header);
             createDrawer();
+            exibirCarrinho();
         } catch (Exception e) {
             LOGGER.error("Erro ao criar o menu de navegação: " + e.getMessage(), e);
             throw new RuntimeException(e);
@@ -77,21 +96,23 @@ public class PrincipalView extends AppLayout {
         cartLink.setRoute(CarrinhoView.class);
         cartLink.add(cartIcon);
 
-        // Top right user menu
+
+
+
         Button logoutButton = new Button("Sair", VaadinIcon.SIGN_OUT.create());
         logoutButton.addClickListener(s -> segurancaService.logout());
 
         if (hasAdminRole()) {
             cartLink.setVisible(false);
         }
-        HorizontalLayout userSection = new HorizontalLayout(loggedUser, avatar, cartLink, logoutButton);
+        HorizontalLayout userSection = new HorizontalLayout(loggedUser, avatar, cartLink, quantidadeCarrinhoItens, logoutButton);
         userSection.setAlignItems(FlexComponent.Alignment.CENTER);
 
         HorizontalLayout header = new HorizontalLayout(toggle, logoLink, brand, userSection);
 
         header.setWidthFull();
 
-        // Let brand stretch and push userSection to the right
+
         header.expand(brand);
 
         // Allow wrapping on small screens
@@ -100,6 +121,26 @@ public class PrincipalView extends AppLayout {
         userSection.getStyle().set("margin-left", "auto");
 
         return header;
+    }
+
+    public void incrementarCarrinho(int quantidadeItens) {
+        if(totalItens == 0) {
+            this.totalItens = quantidadeItens;
+        }
+        else{
+            this.totalItens += 1;
+        }
+
+        quantidadeCarrinhoItens.setText(String.valueOf(totalItens));
+
+    }
+
+    public void exibirCarrinho() throws ObjetoNaoEncontrado, DadosInvalidosException {
+        Usuario usuario = segurancaService.getUsuarioLogado();
+        Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
+        Carrinho carrinho = carrinhoService.buscarCarrinhoPorCliente(cliente.getId());
+        int quantidadeItens = carrinho.getQuatidadeItens();
+        incrementarCarrinho(quantidadeItens);
     }
 
     private void createDrawer() throws ObjetoNaoEncontrado {

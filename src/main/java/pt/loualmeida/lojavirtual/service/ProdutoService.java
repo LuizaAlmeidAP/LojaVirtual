@@ -1,5 +1,6 @@
 package pt.loualmeida.lojavirtual.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -140,8 +141,14 @@ public class ProdutoService {
         return produtoRepository.findAll(Sort.by(campoDeOrdenacao));
     }
 
-    public Set<Produto> buscarProdutoPorTitulo(String titulo) {
-        return produtoRepository.findByLivroTituloContainingIgnoreCase(titulo);
+    public List<Produto> buscarProdutoPorTitulo(String titulo) {
+        String tituloSemAcentos = StringUtils.stripAccents(titulo).toLowerCase();
+        return produtoRepository.findAll().stream()
+                .filter(p -> StringUtils.stripAccents(p.getLivro().getTitulo())
+                        .toLowerCase()
+                        .contains(tituloSemAcentos))
+                .toList();
+
     }
 
     public void atualizarProdutos(List<Produto> produtos) {

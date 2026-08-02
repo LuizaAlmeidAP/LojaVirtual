@@ -27,5 +27,5 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long>, JpaSpec
 
     Set<Produto> findByLivroClassificacao(FaixaEtaria classificacao);
 
-    Set<Produto> findByLivroTituloContainingIgnoreCase(String titulo);
+
 }

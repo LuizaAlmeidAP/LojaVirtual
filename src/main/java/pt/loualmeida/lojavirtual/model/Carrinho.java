@@ -16,7 +16,7 @@ public class Carrinho {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "carrinho_produto",
             joinColumns = @JoinColumn(name = "carrinho_id"),
@@ -24,7 +24,7 @@ public class Carrinho {
     )
     private List<Produto> produtos;
     private Double total;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     private Cliente cliente;
     private LocalDateTime criacao;
 
@@ -41,6 +41,10 @@ public class Carrinho {
             produtos = new ArrayList<Produto>();
         }
         produtos.add(produto);
+    }
+
+    public int getQuatidadeItens(){
+        return produtos.size();
     }
 
 

@@ -165,7 +165,7 @@ public class CatalogoView extends VerticalLayout {
             });
 
         } else if(!temFiltro) {
-            Set<Produto> produtos = produtoService.buscarProdutoPorTitulo(filterText.getValue());
+            List<Produto> produtos = produtoService.buscarProdutoPorTitulo(filterText.getValue());
             produtos.forEach(produto -> {
                 containerProdutos.add(criarCardProduto(produto));
             });
@@ -297,11 +297,8 @@ public class CatalogoView extends VerticalLayout {
             carrinho = carrinhoService.cadastrarCarrinho(carrinho);
         }
         else {
-            carrinhoService.adicionarItens( carrinho.getId(), List.of(produto));
+            carrinho = carrinhoService.adicionarItens( carrinho.getId(), List.of(produto));
         }
-
-        //Adicionar a informação dos produtos no carrinho
-
-
+        ((PrincipalView) getParent().get()).exibirCarrinho();
     }
 }
