@@ -43,6 +43,15 @@ public class Carrinho {
         produtos.add(produto);
     }
 
+    public void removerProduto(Produto produto) {
+        if(produtos == null){
+            return;
+        }
+        produtos.remove(produto);
+    }
+
+
+
     public int getQuatidadeItens(){
         return produtos.size();
     }

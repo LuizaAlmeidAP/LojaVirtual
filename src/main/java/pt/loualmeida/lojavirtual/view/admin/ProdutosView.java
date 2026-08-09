@@ -65,13 +65,8 @@ public class ProdutosView extends VerticalLayout {
         this.livroService = livroService;
         setSizeFull();
         configureGrid();
-
-        // Cria a barra de topo (Filtro + Botão)
         HorizontalLayout toolbar = getToolbar();
-
         add(toolbar, grid);
-
-        // Carrega dados iniciais
         atualizarLista();
 
     }
@@ -115,8 +110,6 @@ public class ProdutosView extends VerticalLayout {
     private void configureGrid() {
         grid.setSizeFull();
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
-
-        // 1. Coluna de FOTO (Renderizador Personalizado)
         grid.addColumn(new ComponentRenderer<>(produto -> {
             Image image;
 
@@ -133,15 +126,13 @@ public class ProdutosView extends VerticalLayout {
                         )
                 );
 
-                // Passa o handler diretamente para a imagem
+
                 image = new Image(handler, "Foto de " + produto.getLivro().getTitulo());
 
             } else {
-                // Placeholder continua igual
+
                 image = new Image("imagens/user-placeholder.png", "Sem foto");
             }
-
-            // Estilização (igual ao anterior)
             image.setWidth("50px");
             image.setHeight("50px");
             image.getStyle().set("border-radius", "50%");

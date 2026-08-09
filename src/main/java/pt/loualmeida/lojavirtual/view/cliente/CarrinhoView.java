@@ -19,6 +19,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
+import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.*;
 import pt.loualmeida.lojavirtual.service.CarrinhoService;
@@ -32,6 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Map;
 
 @Route(value = "carrinho", layout = PrincipalView.class)
 @RolesAllowed("CLIENTE")
@@ -44,7 +46,7 @@ public class CarrinhoView extends VerticalLayout {
     private final CarrinhoService carrinhoService;
     private final SegurancaService segurancaService;
     private final Carrinho carrinho;
-    private final Grid<Produto> grid = new Grid<>(Produto.class, false);
+    private final Grid<Map.Entry<Produto, Long>> grid = new Grid<>();
 
     public CarrinhoView(ClienteService clienteService, ProdutoService produtoService, CarrinhoService carrinhoService, SegurancaService segurancaService) throws ObjetoNaoEncontrado {
         this.clienteService = clienteService;
@@ -82,25 +84,25 @@ public class CarrinhoView extends VerticalLayout {
         grid.setSizeFull();
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-        // 1. Coluna de FOTO (Renderizador Personalizado)
+
         grid.addColumn(new ComponentRenderer<>(produto -> {
             Image image;
 
 
-            if (produto.getLivro() != null && produto.getLivro().getCapa() != null && produto.getLivro().getCapa().length > 0) {
+            if (produto.getKey().getLivro() != null && produto.getKey().getLivro().getCapa() != null && produto.getKey().getLivro().getCapa().length > 0) {
 
 
                 DownloadHandler handler = DownloadHandler.fromInputStream(context ->
                         new DownloadResponse(
-                                new ByteArrayInputStream(produto.getLivro().getCapa()), // O Stream de dados
-                                "foto_" + produto.getId() + ".png",          // Nome do arquivo (importante para cache/tipo)
-                                "image/png",                               // Mime Type (opcional, mas recomendado)
-                                produto.getLivro().getCapa().length                     // Tamanho (opcional)
+                                new ByteArrayInputStream(produto.getKey().getLivro().getCapa()),
+                                "foto_" + produto.getKey().getId() + ".png",
+                                "image/png",
+                                produto.getKey().getLivro().getCapa().length
                         )
                 );
 
                 // Passa o handler diretamente para a imagem
-                image = new Image(handler, "Foto de " + produto.getLivro().getTitulo());
+                image = new Image(handler, "Foto de " + produto.getKey().getLivro().getTitulo());
 
             } else {
                 // Placeholder continua igual
@@ -119,22 +121,19 @@ public class CarrinhoView extends VerticalLayout {
 
 
         grid.addColumn(produto -> {
-            return produto.getLivro().getTitulo();
+            return produto.getKey().getLivro().getTitulo();
         }).setHeader("Título").setSortable(true);
         grid.addColumn(produto -> {
-            List<String> nomesAutores = produto.getLivro().getAutores().stream().map(Autor::getNome).toList();
+            List<String> nomesAutores = produto.getKey().getLivro().getAutores().stream().map(Autor::getNome).toList();
             return String.join(", ", nomesAutores);
         }).setHeader("Autores");
-        grid.addColumn(Produto::getValor).setHeader("Valor").setSortable(true);
+        grid.addColumn(produto -> {
+            return produto.getKey().getValor();
+        }).setHeader("Valor").setSortable(true);
 
 
 
-
-
-
-
-
-
+        grid.addColumn(Map.Entry::getValue).setHeader("Quantidade").setSortable(true);
 
         grid.addComponentColumn(produto -> {
             Button btnProduto = new Button(VaadinIcon.BOOK.create());
@@ -142,10 +141,49 @@ public class CarrinhoView extends VerticalLayout {
             btnProduto.setTooltipText("Detalhes");
 
             btnProduto.addClickListener(e -> {
-                Notification.show("Visualizando produto: " + produto.getLivro().getTitulo());
+                Notification.show("Visualizando produto: " + produto.getKey().getLivro().getTitulo());
             });
             return btnProduto;
         }).setHeader("Detalhes");
+
+        grid.addComponentColumn(produto-> {
+            Button btnAdicionarProduto = new Button(VaadinIcon.PLUS.create());
+            btnAdicionarProduto.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            btnAdicionarProduto.setTooltipText("Adicionar uma unidade do produto");
+            btnAdicionarProduto.addClickListener(e -> {
+                produto.setValue(produto.getValue() + 1);
+                carrinho.adicionarProduto(produto.getKey());
+                try {
+                    carrinhoService.adicionarItens(carrinho.getId(), List.of(produto.getKey()));
+                    ((PrincipalView) getParent().get()).exibirCarrinho();
+                    atualizarLista();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            });
+            return btnAdicionarProduto;
+        }).setHeader("Adicionar");
+
+        grid.addComponentColumn(produto-> {
+            Button btnRemoverProduto = new Button(VaadinIcon.MINUS.create());
+            btnRemoverProduto.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            btnRemoverProduto.setTooltipText("Remover uma unidade do produto");
+            btnRemoverProduto.addClickListener(e -> {
+                produto.setValue(produto.getValue() - 1);
+                carrinho.removerProduto(produto.getKey());
+                try {
+                    carrinhoService.removerItem(carrinho.getId(), produto.getKey());
+                    ((PrincipalView) getParent().get()).exibirCarrinho(); //mudar para remover
+                    atualizarLista();
+
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            });
+            return btnRemoverProduto;
+        }).setHeader("Remover");
 
 
 
@@ -153,7 +191,8 @@ public class CarrinhoView extends VerticalLayout {
     }
 
     private void atualizarLista() throws ObjetoNaoEncontrado {
-        grid.setItems(carrinho.getProdutos());
+        grid.setItems(carrinhoService.mapaDeCompras(carrinho).entrySet());
+
 
     }
 

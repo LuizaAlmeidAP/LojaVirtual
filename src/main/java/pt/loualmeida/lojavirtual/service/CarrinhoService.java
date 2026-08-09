@@ -10,8 +10,11 @@ import pt.loualmeida.lojavirtual.repository.CarrinhoRepository;
 import pt.loualmeida.lojavirtual.repository.ClienteRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CarrinhoService {
@@ -97,6 +100,13 @@ public class CarrinhoService {
         }
         throw new ObjetoNaoEncontrado(String.format("O carrinho %d não foi encontrado.", carrinhoID));
 
+    }
+
+    public Map<Produto, Long> mapaDeCompras(Carrinho carrinho){
+
+        List<Produto> produtos = carrinho.getProdutos();
+        return produtos.stream()
+                .collect(Collectors.groupingBy(produto -> produto, Collectors.counting()));
     }
 
 
