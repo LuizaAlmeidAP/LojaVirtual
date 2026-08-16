@@ -155,7 +155,7 @@ public class CarrinhoView extends VerticalLayout {
                 carrinho.adicionarProduto(produto.getKey());
                 try {
                     carrinhoService.adicionarItens(carrinho.getId(), List.of(produto.getKey()));
-                    ((PrincipalView) getParent().get()).exibirCarrinho();
+                    ((PrincipalView) getParent().get()).exibirCarrinho(true);
                     atualizarLista();
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
@@ -174,7 +174,7 @@ public class CarrinhoView extends VerticalLayout {
                 carrinho.removerProduto(produto.getKey());
                 try {
                     carrinhoService.removerItem(carrinho.getId(), produto.getKey());
-                    ((PrincipalView) getParent().get()).exibirCarrinho(); //mudar para remover
+                    ((PrincipalView) getParent().get()).exibirCarrinho(false); //mudar para remover
                     atualizarLista();
 
                 } catch (Exception ex) {

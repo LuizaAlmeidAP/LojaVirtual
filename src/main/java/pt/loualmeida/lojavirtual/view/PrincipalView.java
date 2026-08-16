@@ -64,7 +64,7 @@ public class PrincipalView extends AppLayout {
             HorizontalLayout header = createHeader();
             addToNavbar(header);
             createDrawer();
-            exibirCarrinho();
+            exibirCarrinho(true);
         } catch (Exception e) {
             LOGGER.error("Erro ao criar o menu de navegação: " + e.getMessage(), e);
             throw new RuntimeException(e);
@@ -135,12 +135,27 @@ public class PrincipalView extends AppLayout {
 
     }
 
-    public void exibirCarrinho() throws ObjetoNaoEncontrado, DadosInvalidosException {
+    public void exibirCarrinho(boolean incrementar) throws ObjetoNaoEncontrado, DadosInvalidosException {
         Usuario usuario = segurancaService.getUsuarioLogado();
         Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
         Carrinho carrinho = carrinhoService.buscarCarrinhoPorCliente(cliente.getId());
         int quantidadeItens = carrinho.getQuatidadeItens();
-        incrementarCarrinho(quantidadeItens);
+        if (incrementar) {
+            incrementarCarrinho(quantidadeItens);
+        } else {
+            decrementarCarrinho(quantidadeItens);
+        }
+    }
+
+    private void decrementarCarrinho(int quantidadeItens) {
+        if(totalItens == 0) {
+            this.totalItens = quantidadeItens;
+        }
+        else{
+            this.totalItens -= 1;
+        }
+
+        quantidadeCarrinhoItens.setText(String.valueOf(totalItens));
     }
 
     private void createDrawer() throws ObjetoNaoEncontrado {

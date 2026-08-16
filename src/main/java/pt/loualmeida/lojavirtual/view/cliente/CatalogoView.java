@@ -299,6 +299,6 @@ public class CatalogoView extends VerticalLayout {
         else {
             carrinho = carrinhoService.adicionarItens( carrinho.getId(), List.of(produto));
         }
-        ((PrincipalView) getParent().get()).exibirCarrinho();
+        ((PrincipalView) getParent().get()).exibirCarrinho(true);
     }
 }
