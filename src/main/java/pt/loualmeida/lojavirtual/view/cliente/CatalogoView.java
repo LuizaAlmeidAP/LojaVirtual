@@ -74,7 +74,7 @@ public class CatalogoView extends VerticalLayout {
 
 
     private HorizontalLayout getToolbar() {
-        //SINGULAR, PLURAL E ACENTUAÇÃO
+
         filterText.setPlaceholder("Filtrar por titulo...");
         filterText.setWidth("100%");
         filterText.setClearButtonVisible(true);
@@ -82,16 +82,11 @@ public class CatalogoView extends VerticalLayout {
         filterText.addValueChangeListener(e -> {
 
                 atualizarLista(null, false);
-
         });
-
-
         ComboBox<Autor> filtroAutor = new ComboBox<>("Autor");
         List<Autor> listaAutores = autorService.buscarTodosAutores("nome");
         filtroAutor.setItems(listaAutores);
         filtroAutor.setItemLabelGenerator(Autor::getNome);
-
-
         ComboBox<Categoria> filtroCategoria = new ComboBox<>("Categoria");
         filtroCategoria.setItems(Categoria.values());
         filtroCategoria.setItemLabelGenerator(Categoria::getTitulo);
@@ -112,8 +107,6 @@ public class CatalogoView extends VerticalLayout {
 
 
         Button btnAplicarFiltros = new Button("Aplicar Filtros");
-
-        // Ação do botão de filtros (Exemplo)
         btnAplicarFiltros.addClickListener(e -> {
 
             try {
@@ -128,23 +121,12 @@ public class CatalogoView extends VerticalLayout {
         }
 
         );
-
-        // 3. Agrupando os filtros adicionais em um layout
         HorizontalLayout layoutFiltrosExtras = new HorizontalLayout(filtroAutor ,filtroCategoria, filtroGenero, filtroFaixaEtaria, filtroMinimo, filtroMaximo, btnAplicarFiltros);
         layoutFiltrosExtras.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
-        layoutFiltrosExtras.getStyle().set("flex-wrap", "wrap"); // Para responsividade
-
-        // 4. Área Expansível (Details)
-        // O Vaadin Details cria a aba que o usuário clica para abrir/fechar
+        layoutFiltrosExtras.getStyle().set("flex-wrap", "wrap");
         Details areaFiltrosAvancados = new Details("Filtros Avançados", layoutFiltrosExtras);
-        areaFiltrosAvancados.setOpened(false); // Garante que a área comece FECHADA
-
-
-
-
+        areaFiltrosAvancados.setOpened(false);
         setSizeFull();
-
-
         HorizontalLayout toolbar = new HorizontalLayout(filterText, areaFiltrosAvancados);
         toolbar.addClassName("toolbar");
         return toolbar;

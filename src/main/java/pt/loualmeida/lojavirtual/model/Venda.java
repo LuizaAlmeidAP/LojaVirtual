@@ -16,10 +16,10 @@ public class Venda {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany
+    @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ItemVenda> itens = new ArrayList<>();
     private BigDecimal total;
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Cliente cliente;
     private LocalDateTime dataCadastro;
     private boolean enviada = false;

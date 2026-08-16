@@ -139,6 +139,7 @@ public class PrincipalView extends AppLayout {
         Usuario usuario = segurancaService.getUsuarioLogado();
         Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
         Carrinho carrinho = carrinhoService.buscarCarrinhoPorCliente(cliente.getId());
+        if(carrinho == null) {return;}
         int quantidadeItens = carrinho.getQuatidadeItens();
         if (incrementar) {
             incrementarCarrinho(quantidadeItens);

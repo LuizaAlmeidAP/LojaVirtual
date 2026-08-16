@@ -22,10 +22,8 @@ import org.slf4j.Logger;
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.*;
-import pt.loualmeida.lojavirtual.service.CarrinhoService;
-import pt.loualmeida.lojavirtual.service.ClienteService;
-import pt.loualmeida.lojavirtual.service.ProdutoService;
-import pt.loualmeida.lojavirtual.service.SegurancaService;
+import pt.loualmeida.lojavirtual.service.*;
+import pt.loualmeida.lojavirtual.view.DialogoView;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
 import java.awt.*;
@@ -41,18 +39,14 @@ public class CarrinhoView extends VerticalLayout {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(CarrinhoView.class);
 
-    private final ClienteService clienteService;
-    private final ProdutoService produtoService;
     private final CarrinhoService carrinhoService;
-    private final SegurancaService segurancaService;
+    private final VendaService vendaService;
     private final Carrinho carrinho;
     private final Grid<Map.Entry<Produto, Long>> grid = new Grid<>();
 
-    public CarrinhoView(ClienteService clienteService, ProdutoService produtoService, CarrinhoService carrinhoService, SegurancaService segurancaService) throws ObjetoNaoEncontrado {
-        this.clienteService = clienteService;
-        this.produtoService = produtoService;
+    public CarrinhoView(ClienteService clienteService, VendaService vendaService, CarrinhoService carrinhoService, SegurancaService segurancaService) throws ObjetoNaoEncontrado {
+        this.vendaService = vendaService;
         this.carrinhoService = carrinhoService;
-        this.segurancaService = segurancaService;
 
         Usuario usuario = segurancaService.getUsuarioLogado();
         Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
@@ -74,9 +68,24 @@ public class CarrinhoView extends VerticalLayout {
         NumberFormat formatador = new DecimalFormat("#0.00");
         Span nItens = new Span("Número de itens: " + carrinho.getQuatidadeItens());
         Span valorTotal = new Span("Valor total: R$" + formatador.format(carrinho.getTotal()));
-        HorizontalLayout toolbar = new HorizontalLayout(nItens, valorTotal);
+        Button pagar = new Button("Pagar", VaadinIcon.MONEY.create());
+        pagar.addClickListener(e -> {
+            try {
+                pagamento();
+            } catch (ObjetoNaoEncontrado ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        HorizontalLayout toolbar = new HorizontalLayout(nItens, valorTotal, pagar);
         toolbar.addClassName("toolbar");
         return toolbar;
+    }
+
+    private void pagamento() throws ObjetoNaoEncontrado {
+        Venda pedido = vendaService.cadastrarVenda(carrinho);
+
+        DialogoView.sucesso(String.format("A sua compra foi feita com sucesso! O número do seu pedido é %d.", pedido.getId()));
+
     }
 
 
