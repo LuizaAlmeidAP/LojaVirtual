@@ -31,6 +31,7 @@ public class VendaService {
         venda.setCliente(carrinho.getCliente());
         venda.setItens(criarItensVenda(carrinho.getProdutos()));
         venda.setDataCadastro(LocalDateTime.now());
+        venda.setTotal(carrinho.getTotal());
         atualizarEstoque(venda);
         carrinhoService.deletarCarrinho(carrinho.getId());
         return vendaRepository.save(venda);

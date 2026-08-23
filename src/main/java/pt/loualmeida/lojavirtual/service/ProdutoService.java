@@ -60,7 +60,6 @@ public class ProdutoService {
     }
 
     private boolean produtoExiste(Produto produto) {
-
         return produtoRepository.existsByLivro(produto.getLivro());
     }
 
@@ -116,8 +115,7 @@ public class ProdutoService {
 
     public boolean produtoEmEstoque(Produto produto){
         if(!produtoExiste(produto)) return false;
-        if(produto.getEstoque() > 0) return true;
-        return false;
+        return produto.getEstoque() > 0;
     }
 
     public void atualizarProduto(Produto produto) throws ObjetoNaoEncontrado {
@@ -136,6 +134,8 @@ public class ProdutoService {
 
 
     }
+
+
 
     public List<Produto> buscarTodosProdutos(String campoDeOrdenacao) {
         return produtoRepository.findAll(Sort.by(campoDeOrdenacao));

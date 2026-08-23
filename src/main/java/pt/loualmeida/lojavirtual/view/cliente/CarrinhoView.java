@@ -19,6 +19,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.*;
@@ -37,16 +38,19 @@ import java.util.Map;
 @RolesAllowed("CLIENTE")
 public class CarrinhoView extends VerticalLayout {
 
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(CarrinhoView.class);
+    private static final Logger logger = LoggerFactory.getLogger(CarrinhoView.class);
 
     private final CarrinhoService carrinhoService;
     private final VendaService vendaService;
+    private  final ProdutoService produtoService;
     private final Carrinho carrinho;
     private final Grid<Map.Entry<Produto, Long>> grid = new Grid<>();
 
-    public CarrinhoView(ClienteService clienteService, VendaService vendaService, CarrinhoService carrinhoService, SegurancaService segurancaService) throws ObjetoNaoEncontrado {
+    public CarrinhoView(ClienteService clienteService, VendaService vendaService, CarrinhoService carrinhoService,
+                        SegurancaService segurancaService, ProdutoService produtoService) throws ObjetoNaoEncontrado {
         this.vendaService = vendaService;
         this.carrinhoService = carrinhoService;
+        this.produtoService = produtoService;
 
         Usuario usuario = segurancaService.getUsuarioLogado();
         Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
@@ -160,6 +164,11 @@ public class CarrinhoView extends VerticalLayout {
             btnAdicionarProduto.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             btnAdicionarProduto.setTooltipText("Adicionar uma unidade do produto");
             btnAdicionarProduto.addClickListener(e -> {
+                if(!produtoService.produtoEmEstoque(produto.getKey())) {
+                    DialogoView.aviso(String.format("O produto %s não existe em estoque. Desculpe o transtorno.",
+                            produto.getKey().getLivro().getTitulo()));
+                    return;
+                }
                 produto.setValue(produto.getValue() + 1);
                 carrinho.adicionarProduto(produto.getKey());
                 try {

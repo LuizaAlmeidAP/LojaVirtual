@@ -18,7 +18,7 @@ public class Venda {
     private Long id;
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ItemVenda> itens = new ArrayList<>();
-    private BigDecimal total;
+    private Double total;
     @ManyToOne
     private Cliente cliente;
     private LocalDateTime dataCadastro;

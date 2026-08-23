@@ -31,6 +31,7 @@ import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.*;
 import pt.loualmeida.lojavirtual.service.*;
+import pt.loualmeida.lojavirtual.view.DialogoView;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
 import java.io.ByteArrayInputStream;
@@ -269,6 +270,10 @@ public class CatalogoView extends VerticalLayout {
         UI.getCurrent().navigate("produto/" + produto.getId());
     }
     private void adicionarAoCarrinho(Produto produto) throws ObjetoNaoEncontrado, DadosInvalidosException {
+        if(!produtoService.produtoEmEstoque(produto)) {
+            DialogoView.aviso(String.format("O produto %s não existe em estoque. Desculpe o transtorno.", produto.getLivro().getTitulo()));
+            return;
+        }
         Usuario usuario = segurancaService.getUsuarioLogado();
         Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
         Carrinho carrinho = carrinhoService.buscarCarrinhoPorCliente(cliente.getId());

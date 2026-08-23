@@ -61,17 +61,18 @@ public class PrincipalView extends AppLayout {
         this.clienteService = clienteService;
         try {
             // Top navbar
-            HorizontalLayout header = createHeader();
+            Usuario usuarioLogado = segurancaService.getUsuarioLogado();
+            HorizontalLayout header = createHeader(usuarioLogado);
             addToNavbar(header);
             createDrawer();
-            exibirCarrinho(true);
+            if(usuarioLogado.getPerfil() == Perfil.CLIENTE) exibirCarrinho(true);
         } catch (Exception e) {
             LOGGER.error("Erro ao criar o menu de navegação: " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
 
-    private HorizontalLayout createHeader() throws ObjetoNaoEncontrado {
+    private HorizontalLayout createHeader(Usuario usuarioLogado) throws ObjetoNaoEncontrado {
         DrawerToggle toggle = new DrawerToggle();
 
         Image logo = new Image("imagens/logo_for_loualmeida.jpg", TITULO_APP);
@@ -86,7 +87,7 @@ public class PrincipalView extends AppLayout {
         brand.setRoute(ProdutosView.class);
         brand.add(title);
 
-        Usuario usuarioLogado = segurancaService.getUsuarioLogado();
+
 
         Span loggedUser = new Span(usuarioLogado.getNome());
         Avatar avatar = new Avatar(usuarioLogado.getNome());
