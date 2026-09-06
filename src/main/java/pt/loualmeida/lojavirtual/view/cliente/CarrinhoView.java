@@ -172,7 +172,7 @@ public class CarrinhoView extends VerticalLayout {
                 produto.setValue(produto.getValue() + 1);
                 carrinho.adicionarProduto(produto.getKey());
                 try {
-                    carrinhoService.adicionarItens(carrinho.getId(), List.of(produto.getKey()));
+                    carrinhoService.adicionarItem(carrinho.getId(), produto.getKey());
                     ((PrincipalView) getParent().get()).exibirCarrinho(true);
                     atualizarLista();
                 } catch (Exception ex) {

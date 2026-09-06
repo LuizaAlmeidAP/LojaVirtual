@@ -2,12 +2,12 @@ package pt.loualmeida.lojavirtual.service;
 
 import org.springframework.stereotype.Service;
 import pt.loualmeida.lojavirtual.exception.DadosInvalidosException;
+import pt.loualmeida.lojavirtual.exception.EstoqueIndisponivelException;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
-import pt.loualmeida.lojavirtual.model.Carrinho;
-import pt.loualmeida.lojavirtual.model.Cliente;
-import pt.loualmeida.lojavirtual.model.Produto;
+import pt.loualmeida.lojavirtual.model.*;
 import pt.loualmeida.lojavirtual.repository.CarrinhoRepository;
 import pt.loualmeida.lojavirtual.repository.ClienteRepository;
+import pt.loualmeida.lojavirtual.repository.ProdutoRepository;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -20,18 +20,21 @@ import java.util.stream.Collectors;
 public class CarrinhoService {
     private final CarrinhoRepository carrinhoRepository;
     private final ClienteRepository clienteRepository;
+    private final ProdutoRepository produtoRepository;
 
     public CarrinhoService(CarrinhoRepository carrinhoRepository,
-                           ClienteRepository clienteRepository) {
+                           ClienteRepository clienteRepository,
+                           ProdutoRepository produtoRepository) {
         this.carrinhoRepository = carrinhoRepository;
         this.clienteRepository = clienteRepository;
+        this.produtoRepository = produtoRepository;
 
     }
 
     public Carrinho cadastrarCarrinho(Carrinho carrinho) throws DadosInvalidosException {
         validarCarrinho(carrinho);
         carrinho.setCriacao(LocalDateTime.now());
-
+        atualizarEstoque(carrinho.getProdutos().getFirst(), true); //Fragil
         return carrinhoRepository.save(carrinho);
     }
 
@@ -45,12 +48,29 @@ public class CarrinhoService {
         }
     }
 
-    public Carrinho adicionarItens(Long carrinhoID, List<Produto> produtos) throws ObjetoNaoEncontrado {
+
+    private void atualizarEstoque(Produto produto, boolean remocao){
+        if(remocao) {
+            if (produto.getEstoque() == 0) {
+                throw new EstoqueIndisponivelException(produto);
+            }
+            produto.setEstoque(produto.getEstoque() - 1);
+        }
+        else{
+            produto.setEstoque(produto.getEstoque() + 1);
+        }
+        produtoRepository.save(produto);
+
+    }
+
+    public Carrinho adicionarItem(Long carrinhoID, Produto produto) throws ObjetoNaoEncontrado {
         Optional<Carrinho> optCarrinho = carrinhoRepository.findById(carrinhoID);
         if(optCarrinho.isPresent()){
             Carrinho carrinho = optCarrinho.get();
-            carrinho.getProdutos().addAll(produtos);
+            carrinho.getProdutos().add(produto);
+            atualizarEstoque(produto, true);
             carrinhoRepository.save(carrinho);
+
             return carrinho;
         }
         throw new ObjetoNaoEncontrado(String.format("O carrinho %d não foi encontrado.", carrinhoID));
@@ -61,6 +81,7 @@ public class CarrinhoService {
         if(optCarrinho.isPresent()){
             Carrinho carrinho = optCarrinho.get();
             carrinho.getProdutos().remove(produto);
+            atualizarEstoque(produto, false);
             carrinhoRepository.save(carrinho);
             return;
         }
@@ -72,6 +93,9 @@ public class CarrinhoService {
         Optional<Carrinho> optCarrinho = carrinhoRepository.findById(carrinhoID);
         if(optCarrinho.isPresent()){
             Carrinho carrinho = optCarrinho.get();
+            for(Produto produto : carrinho.getProdutos()){
+                atualizarEstoque(produto, false);
+            }
             carrinho.getProdutos().clear();
             carrinhoRepository.save(carrinho);
             return;

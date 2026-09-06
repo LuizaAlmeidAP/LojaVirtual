@@ -16,13 +16,13 @@ import java.util.List;
 @Service
 public class VendaService {
     private final VendaRepository vendaRepository;
-    private final ProdutoRepository produtoRepository;
+
     private final CarrinhoService carrinhoService;
 
-    public VendaService(VendaRepository vendaRepository, ProdutoRepository produtoRepository, CarrinhoService carrinhoService)
+    public VendaService(VendaRepository vendaRepository, CarrinhoService carrinhoService)
     {
         this.vendaRepository = vendaRepository;
-        this.produtoRepository = produtoRepository;
+
         this.carrinhoService = carrinhoService;
     }
 
@@ -32,7 +32,7 @@ public class VendaService {
         venda.setItens(criarItensVenda(carrinho.getProdutos()));
         venda.setDataCadastro(LocalDateTime.now());
         venda.setTotal(carrinho.getTotal());
-        atualizarEstoque(venda);
+
         carrinhoService.deletarCarrinho(carrinho.getId());
         return vendaRepository.save(venda);
     }
@@ -54,26 +54,12 @@ public class VendaService {
     }
 
 
-
-
     private ItemVenda criarItem(Produto produto) {
         ItemVenda item = new ItemVenda();
         item.setProduto(produto);
         item.setQuantidade(1);
         return item;
     }
-
-
-    private void atualizarEstoque(Venda venda){
-        List<ItemVenda> itens = venda.getItens();
-        for(ItemVenda item : itens){
-            Produto produto = item.getProduto();
-            produto.setEstoque(produto.getEstoque() - item.getQuantidade());
-            produtoRepository.save(produto);
-        }
-
-    }
-
 
     public List<Venda> buscarPendentes() {
         return vendaRepository.findByEnviadaFalseOrderByDataCadastroAsc();

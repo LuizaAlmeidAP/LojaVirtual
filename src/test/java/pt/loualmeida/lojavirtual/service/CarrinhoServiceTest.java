@@ -53,7 +53,7 @@ public class CarrinhoServiceTest {
         usuario.setPerfil(perfil);
         try {
             byte[] imagem = Files.readAllBytes(Paths.get("src/test/resources/CapaLadaroRaios.jpg"));
-            usuario.setImagem(imagem);
+            usuario.setFoto(imagem);
         } catch (IOException e) {
             fail(e.getMessage());
         }
@@ -67,7 +67,7 @@ public class CarrinhoServiceTest {
         cliente.getUsuario().setNome("Cliente");
         cliente.setDocumento("NIF");
         cliente.setNascimento(LocalDate.of(1973, Month.DECEMBER, 20));
-        cliente.setImagem(usuario.getImagem());
+
         return cliente;
     }
 
@@ -102,7 +102,7 @@ public class CarrinhoServiceTest {
         Produto produto = new Produto();
         produto.setId(1L);
         produto.setLivro(livro);
-        produto.setValor(new BigDecimal(25.00));
+        produto.setValor(25.00);
         produto.setEstoque(20);
         return produto;
     }
@@ -125,7 +125,7 @@ public class CarrinhoServiceTest {
         Produto novoProduto = instanciarProduto(novoLivro);
         Produto segundoProduto = instanciarProduto(segundoLivro);
         segundoProduto.setEstoque(50);
-        segundoProduto.setValor(new BigDecimal(27.00));
+        segundoProduto.setValor(27.00);
         Usuario novoUsuario = instanciarUsuario(Perfil.CLIENTE);
         Cliente novoCliente = instanciarCliente(novoUsuario);
         List<Produto> produtos = new ArrayList<>();
@@ -201,8 +201,8 @@ public class CarrinhoServiceTest {
         when(carrinhoRepository.save(any(Carrinho.class))).thenReturn(novoCarrinho);
         try {
             List<Produto> novosProdutos = List.of(novoProduto);
-            carrinhoService.adicionarItens(novoCarrinho.getId(),
-                    List.of(novoProduto));
+            carrinhoService.adicionarItem(novoCarrinho.getId(),
+                    novoProduto);
             assertEquals(novoCarrinho.getProdutos().size(),
                     antigoSize + novosProdutos.size());
 
@@ -221,7 +221,7 @@ public class CarrinhoServiceTest {
         ObjetoNaoEncontrado e = assertThrows(
                 ObjetoNaoEncontrado.class,
                 () -> {
-                    carrinhoService.adicionarItens(novoCarrinho.getId(), List.of(novoProduto));
+                    carrinhoService.adicionarItem(novoCarrinho.getId(), novoProduto);
                 }
         );
         assertNotNull(e.getMessage());

@@ -284,7 +284,7 @@ public class CatalogoView extends VerticalLayout {
             carrinho = carrinhoService.cadastrarCarrinho(carrinho);
         }
         else {
-            carrinho = carrinhoService.adicionarItens( carrinho.getId(), List.of(produto));
+            carrinho = carrinhoService.adicionarItem( carrinho.getId(), produto);
         }
         ((PrincipalView) getParent().get()).exibirCarrinho(true);
     }
