@@ -149,7 +149,7 @@ public class PrincipalView extends AppLayout {
         }
     }
 
-    private void decrementarCarrinho(int quantidadeItens) {
+    public void decrementarCarrinho(int quantidadeItens) {
         if(totalItens == 0) {
             this.totalItens = quantidadeItens;
         }
@@ -158,6 +158,12 @@ public class PrincipalView extends AppLayout {
         }
 
         quantidadeCarrinhoItens.setText(String.valueOf(totalItens));
+    }
+
+    public void clearCarrinho(){
+
+        totalItens = 0;
+        quantidadeCarrinhoItens.setText("");
     }
 
     private void createDrawer() throws ObjetoNaoEncontrado {

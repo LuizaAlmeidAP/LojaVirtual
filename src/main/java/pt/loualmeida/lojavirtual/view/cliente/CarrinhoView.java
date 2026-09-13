@@ -1,5 +1,6 @@
 package pt.loualmeida.lojavirtual.view.cliente;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -76,6 +77,9 @@ public class CarrinhoView extends VerticalLayout {
         pagar.addClickListener(e -> {
             try {
                 pagamento();
+                ((PrincipalView) getParent().get()).clearCarrinho();
+                UI.getCurrent().navigate(CatalogoView.class);
+
             } catch (ObjetoNaoEncontrado ex) {
                 throw new RuntimeException(ex);
             }

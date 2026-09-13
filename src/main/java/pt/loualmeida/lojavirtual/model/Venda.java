@@ -3,11 +3,14 @@ package pt.loualmeida.lojavirtual.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pt.loualmeida.lojavirtual.utils.FormatadorUtils;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Entity
 @Data
@@ -23,6 +26,10 @@ public class Venda {
     private Cliente cliente;
     private LocalDateTime dataCadastro;
     private boolean enviada = false;
+
+    public String getValorTotalFormatado() {
+        return FormatadorUtils.formataValorMonetario(total);
+    }
 
 
 

@@ -44,6 +44,7 @@ public class VendaService {
                             item.getProduto().getId().equals(produto.getId())).
                     findFirst().ifPresentOrElse(item -> {
                                 item.setQuantidade(item.getQuantidade() + 1);
+                                item.setPrecoTotal(item.getPrecoUnitario() * item.getQuantidade());
                             },
                             () -> itens.add(criarItem(produto))
                     );
@@ -58,6 +59,9 @@ public class VendaService {
         ItemVenda item = new ItemVenda();
         item.setProduto(produto);
         item.setQuantidade(1);
+        item.setPrecoUnitario(produto.getValor());
+        item.setPrecoTotal(produto.getValor());
+
         return item;
     }
 

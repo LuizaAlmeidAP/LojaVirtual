@@ -4,8 +4,10 @@ package pt.loualmeida.lojavirtual.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pt.loualmeida.lojavirtual.utils.FormatadorUtils;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 @Entity
 @Data
@@ -17,8 +19,16 @@ public class ItemVenda {
     @ManyToOne
     private Produto produto;
     private int quantidade;
-    private BigDecimal precoUnitario;
-    private BigDecimal precoTotal;
+    private Double precoUnitario;
+    private Double precoTotal;
 
+
+    public String getPrecoUnitarioFormatado() {
+        return FormatadorUtils.formataValorMonetario(precoUnitario);
+    }
+
+    public String getPrecoTotalFormatado() {
+        return FormatadorUtils.formataValorMonetario(precoTotal);
+    }
 
 }

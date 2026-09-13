@@ -41,7 +41,7 @@ public class VendasFeitasView extends VerticalLayout {
         grid.setSizeFull();
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
-        // 1. Colunas Principais da Venda
+
         grid.addColumn(Venda::getId).setHeader("ID").setWidth("80px").setFlexGrow(0);
 
         grid.addColumn(new LocalDateTimeRenderer<>(
@@ -52,10 +52,9 @@ public class VendasFeitasView extends VerticalLayout {
         grid.addColumn(venda -> venda.getCliente() != null ? venda.getCliente().getUsuario().getNome() : "N/A")
                 .setHeader("Cliente");
 
-        grid.addColumn(venda -> "R$ " + venda.getTotal())
+        grid.addColumn(Venda :: getValorTotalFormatado)
                 .setHeader("Total");
 
-        // 2. Coluna de Ação (Botão Enviar)
         grid.addComponentColumn(venda -> {
             Button btnEnviar = new Button("Marcar como Enviado", VaadinIcon.TRUCK.create());
             btnEnviar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -63,33 +62,35 @@ public class VendasFeitasView extends VerticalLayout {
             btnEnviar.addClickListener(event -> {
                 vendaService.marcarComoEnviada(venda);
                 Notification.show("Venda #" + venda.getId() + " marcada como enviada.");
-                atualizarLista(); // Remove o item da lista visualmente
+                atualizarLista();
             });
 
             return btnEnviar;
         }).setHeader("Ações");
 
-        // 3. Detalhes da Linha (Para mostrar os Itens da Venda)
+
         grid.setItemDetailsRenderer(new ComponentRenderer<>(this::criarGridItens));
     }
 
-    // Cria uma sub-grid para mostrar os itens quando expandir a linha
+
     private Grid<ItemVenda> criarGridItens(Venda venda) {
         Grid<ItemVenda> gridItens = new Grid<>(ItemVenda.class, false);
         gridItens.setItems(venda.getItens());
         gridItens.addThemeVariants(GridVariant.LUMO_COMPACT);
-        //gridItens.setHeightByRows(true); // Altura dinâmica
+
 
         gridItens.addColumn(item -> item.getProduto().getLivro().getTitulo()).setHeader("Produto");
         gridItens.addColumn(ItemVenda::getQuantidade).setHeader("Qtd");
-        gridItens.addColumn(item -> "R$ " + item.getPrecoUnitario()).setHeader("Valor Unit.");
-        gridItens.addColumn(item -> "R$ " + item.getPrecoTotal()).setHeader("Total Item");
+        gridItens.addColumn(ItemVenda :: getPrecoUnitarioFormatado).setHeader("Valor Unit.");
+        gridItens.addColumn(ItemVenda::getPrecoTotalFormatado).setHeader("Total Item");
+
+        gridItens.setAllRowsVisible(true);
 
         return gridItens;
     }
 
     private void atualizarLista() {
-        // Busca apenas as não enviadas, ordenadas pela data (antigas primeiro)
+
         List<Venda> vendas = vendaService.buscarPendentes();
         grid.setItems(vendas);
     }
