@@ -105,7 +105,6 @@ public class CarrinhoView extends VerticalLayout {
         grid.addColumn(new ComponentRenderer<>(produto -> {
             Image image;
 
-
             if (produto.getKey().getLivro() != null && produto.getKey().getLivro().getCapa() != null && produto.getKey().getLivro().getCapa().length > 0) {
 
 

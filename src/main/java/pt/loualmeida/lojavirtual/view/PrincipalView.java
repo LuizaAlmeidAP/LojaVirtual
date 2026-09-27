@@ -54,13 +54,17 @@ public class PrincipalView extends AppLayout {
     private final Span quantidadeCarrinhoItens = new Span();
 
     private int totalItens = 0;
+    private Button cartLink;
+
+
 
     public PrincipalView(SegurancaService segurancaService, CarrinhoService carrinhoService, ClienteService clienteService) {
         this.segurancaService = segurancaService;
         this.carrinhoService = carrinhoService;
         this.clienteService = clienteService;
+        cartLink = new Button();
         try {
-            // Top navbar
+
             Usuario usuarioLogado = segurancaService.getUsuarioLogado();
             HorizontalLayout header = createHeader(usuarioLogado);
             addToNavbar(header);
@@ -92,13 +96,19 @@ public class PrincipalView extends AppLayout {
         Span loggedUser = new Span(usuarioLogado.getNome());
         Avatar avatar = new Avatar(usuarioLogado.getNome());
 
-        RouterLink cartLink = new RouterLink();
+
         Icon cartIcon = VaadinIcon.CART.create();
-        cartLink.setRoute(CarrinhoView.class);
-        cartLink.add(cartIcon);
+        cartLink.addClickListener(event -> {
+            cartLink.getUI().ifPresent(ui -> {ui.navigate(CarrinhoView.class);});
+        });
+        cartLink.setIcon(cartIcon);
+        cartLink.addThemeName("tertiary");
+        Long clienteId = clienteService.buscarClientePorUsuario(usuarioLogado).getId();
+        if(!carrinhoService.existeCarrinhoDoCliente(clienteId)) {
 
+            cartLink.setEnabled(false);
 
-
+        }
 
         Button logoutButton = new Button("Sair", VaadinIcon.SIGN_OUT.create());
         logoutButton.addClickListener(s -> segurancaService.logout());
@@ -108,17 +118,10 @@ public class PrincipalView extends AppLayout {
         }
         HorizontalLayout userSection = new HorizontalLayout(loggedUser, avatar, cartLink, quantidadeCarrinhoItens, logoutButton);
         userSection.setAlignItems(FlexComponent.Alignment.CENTER);
-
         HorizontalLayout header = new HorizontalLayout(toggle, logoLink, brand, userSection);
-
         header.setWidthFull();
-
-
         header.expand(brand);
-
-        // Allow wrapping on small screens
         header.getStyle().set("flex-wrap", "wrap");
-
         userSection.getStyle().set("margin-left", "auto");
 
         return header;
@@ -127,6 +130,7 @@ public class PrincipalView extends AppLayout {
     public void incrementarCarrinho(int quantidadeItens) {
         if(totalItens == 0) {
             this.totalItens = quantidadeItens;
+
         }
         else{
             this.totalItens += 1;
@@ -141,6 +145,7 @@ public class PrincipalView extends AppLayout {
         Cliente cliente = clienteService.buscarClientePorUsuario(usuario);
         Carrinho carrinho = carrinhoService.buscarCarrinhoPorCliente(cliente.getId());
         if(carrinho == null) {return;}
+        cartLink.setEnabled(true);
         int quantidadeItens = carrinho.getQuatidadeItens();
         if (incrementar) {
             incrementarCarrinho(quantidadeItens);
@@ -164,6 +169,8 @@ public class PrincipalView extends AppLayout {
 
         totalItens = 0;
         quantidadeCarrinhoItens.setText("");
+        cartLink.setEnabled(false);
+
     }
 
     private void createDrawer() throws ObjetoNaoEncontrado {

@@ -38,7 +38,7 @@ public class Livro {
     private Genero genero;
     @Column(length = 2000)
     private String descricao;
-    private String tags;
+
 
     public Livro(Long id, String titulo, byte[] capa,
                  Set<Autor> autores, String sinopse, FaixaEtaria classificacao,

@@ -115,6 +115,10 @@ public class CarrinhoService {
 
     }
 
+    public boolean existeCarrinhoDoCliente(Long clienteId) throws ObjetoNaoEncontrado {
+        return buscarCarrinhoPorCliente(clienteId) != null;
+    }
+
     public void deletarCarrinho(Long carrinhoID) throws ObjetoNaoEncontrado {
         Optional<Carrinho> optCarrinho = carrinhoRepository.findById(carrinhoID);
         if(optCarrinho.isPresent()){

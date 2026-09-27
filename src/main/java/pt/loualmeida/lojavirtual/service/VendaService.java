@@ -2,10 +2,7 @@ package pt.loualmeida.lojavirtual.service;
 
 import org.springframework.stereotype.Service;
 import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
-import pt.loualmeida.lojavirtual.model.Carrinho;
-import pt.loualmeida.lojavirtual.model.ItemVenda;
-import pt.loualmeida.lojavirtual.model.Produto;
-import pt.loualmeida.lojavirtual.model.Venda;
+import pt.loualmeida.lojavirtual.model.*;
 import pt.loualmeida.lojavirtual.repository.ProdutoRepository;
 import pt.loualmeida.lojavirtual.repository.VendaRepository;
 
@@ -34,6 +31,7 @@ public class VendaService {
         venda.setTotal(carrinho.getTotal());
 
         carrinhoService.deletarCarrinho(carrinho.getId());
+
         return vendaRepository.save(venda);
     }
 
@@ -69,8 +67,16 @@ public class VendaService {
         return vendaRepository.findByEnviadaFalseOrderByDataCadastroAsc();
     }
 
+    public List<Venda> buscarPedidosCliente(Cliente cliente) {
+        return vendaRepository.findByClienteOrderByDataCadastroAsc(cliente);
+    }
+
     public void marcarComoEnviada(Venda venda) {
         venda.setEnviada(true);
+        vendaRepository.save(venda);
+    }
+    public void marcarComoRecebida(Venda venda) {
+        venda.setRecebida(true);
         vendaRepository.save(venda);
     }
 

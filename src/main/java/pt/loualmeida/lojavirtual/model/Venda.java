@@ -27,6 +27,8 @@ public class Venda {
     private LocalDateTime dataCadastro;
     private boolean enviada = false;
 
+    private boolean recebida = false;
+
     public String getValorTotalFormatado() {
         return FormatadorUtils.formataValorMonetario(total);
     }
