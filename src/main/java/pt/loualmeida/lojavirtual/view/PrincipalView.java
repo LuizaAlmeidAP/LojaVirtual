@@ -37,13 +37,13 @@ import pt.loualmeida.lojavirtual.view.cliente.PedidosView;
 
 import java.util.List;
 
-@Route("")
+@Route("principal")
 @RolesAllowed({"CLIENTE", "ADMINISTRADOR"})
 public class PrincipalView extends AppLayout {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrincipalView.class);
 
-    private static final String TITULO_APP = "LouAlmeida";
+    private static final String TITULO_APP = "Livraria";
 
     private final SegurancaService segurancaService;
 
@@ -82,17 +82,21 @@ public class PrincipalView extends AppLayout {
         Image logo = new Image("imagens/logo_for_loualmeida.jpg", TITULO_APP);
         logo.setHeight("50px"); // <- small toolbar size
         RouterLink logoLink = new RouterLink();
-        logoLink.setRoute(ProdutosView.class);
-        logoLink.add(logo);
 
         H1 title = new H1(TITULO_APP);
         title.getStyle().setMargin("0");
         RouterLink brand = new RouterLink();
-        brand.setRoute(ProdutosView.class);
+        if(usuarioLogado.getPerfil() == Perfil.ADMINISTRADOR) {
+            brand.setRoute(ProdutosView.class);
+            logoLink.setRoute(ProdutosView.class);
+        }
+        else{
+            brand.setRoute(CatalogoView.class);
+            logoLink.setRoute(CatalogoView.class);
+        }
+
         brand.add(title);
-
-
-
+        logoLink.add(logo);
         Span loggedUser = new Span(usuarioLogado.getNome());
         Avatar avatar = new Avatar(usuarioLogado.getNome());
 
@@ -103,19 +107,23 @@ public class PrincipalView extends AppLayout {
         });
         cartLink.setIcon(cartIcon);
         cartLink.addThemeName("tertiary");
-        Long clienteId = clienteService.buscarClientePorUsuario(usuarioLogado).getId();
-        if(!carrinhoService.existeCarrinhoDoCliente(clienteId)) {
+        if(!hasAdminRole()){
+            Long clienteId = clienteService.buscarClientePorUsuario(usuarioLogado).getId();
+            if(!carrinhoService.existeCarrinhoDoCliente(clienteId)) {
 
-            cartLink.setEnabled(false);
+                cartLink.setEnabled(false);
 
+            }
         }
+        else{
+            cartLink.setVisible(false);
+        }
+
 
         Button logoutButton = new Button("Sair", VaadinIcon.SIGN_OUT.create());
         logoutButton.addClickListener(s -> segurancaService.logout());
 
-        if (hasAdminRole()) {
-            cartLink.setVisible(false);
-        }
+
         HorizontalLayout userSection = new HorizontalLayout(loggedUser, avatar, cartLink, quantidadeCarrinhoItens, logoutButton);
         userSection.setAlignItems(FlexComponent.Alignment.CENTER);
         HorizontalLayout header = new HorizontalLayout(toggle, logoLink, brand, userSection);

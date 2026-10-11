@@ -11,6 +11,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
+//Esquecer a senha
+//Criar opção de cadastro
+
 @Route("login")
 @PageTitle("Login/Loja Virtual")
 @AnonymousAllowed
@@ -19,9 +22,9 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final String nomeLoja = "Loja Virtual";
 
     public LoginView() {
-        //Estilização
+
         estilicacao();
-        //Configuração de ações de login
+
         configurarAcoesDeLogin();
 
         H1 titulo = new H1(nomeLoja);
@@ -34,7 +37,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         add(titulo, texto, loginForm);
     }
 
-    /// Colocar em Português o conteúdo do formulário
+
     private LoginI18n criarPortuguesI18n(){
         LoginI18n i18n =  LoginI18n.createDefault();
         i18n.getForm().setTitle("Login");
@@ -67,6 +70,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     //Fazer
     private void acaoEsqueciMinhaSenha(){
+        loginForm.setAction("forgotPassword");
 
     }
 

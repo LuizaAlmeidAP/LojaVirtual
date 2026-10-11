@@ -28,13 +28,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/publica").permitAll()
                 .requestMatchers("/login").permitAll()
+                .requestMatchers("/cadastro").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ADMINISTRADOR")
         );
 
         http.csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**", "/login")
+                .ignoringRequestMatchers("/h2-console/**", "/login", "/cadastro", "/publica")
         );
 
         http.headers(headers -> headers
