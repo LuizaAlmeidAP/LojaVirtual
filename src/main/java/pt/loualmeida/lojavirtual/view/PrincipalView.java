@@ -32,10 +32,11 @@ import pt.loualmeida.lojavirtual.service.ClienteService;
 import pt.loualmeida.lojavirtual.service.SegurancaService;
 import pt.loualmeida.lojavirtual.view.admin.*;
 import pt.loualmeida.lojavirtual.view.cliente.CarrinhoView;
-import pt.loualmeida.lojavirtual.view.cliente.CatalogoView;
+import pt.loualmeida.lojavirtual.view.cliente.CatalogoAutenticadoView;
+
 import pt.loualmeida.lojavirtual.view.cliente.PedidosView;
 
-import java.util.List;
+
 
 @Route("principal")
 @RolesAllowed({"CLIENTE", "ADMINISTRADOR"})
@@ -80,7 +81,7 @@ public class PrincipalView extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
 
         Image logo = new Image("imagens/logo_for_loualmeida.jpg", TITULO_APP);
-        logo.setHeight("50px"); // <- small toolbar size
+        logo.setHeight("50px");
         RouterLink logoLink = new RouterLink();
 
         H1 title = new H1(TITULO_APP);
@@ -91,8 +92,8 @@ public class PrincipalView extends AppLayout {
             logoLink.setRoute(ProdutosView.class);
         }
         else{
-            brand.setRoute(CatalogoView.class);
-            logoLink.setRoute(CatalogoView.class);
+            brand.setRoute(CatalogoAutenticadoView.class);
+            logoLink.setRoute(CatalogoAutenticadoView.class);
         }
 
         brand.add(title);
@@ -218,7 +219,7 @@ public class PrincipalView extends AppLayout {
     }
 
     private void buildClientMenu(SideNav nav) {
-        SideNavItem produtosLink = new SideNavItem("Produtos", CatalogoView.class, VaadinIcon.PACKAGE.create());
+        SideNavItem produtosLink = new SideNavItem("Produtos", CatalogoAutenticadoView.class, VaadinIcon.PACKAGE.create());
         SideNavItem pedidosLink = new SideNavItem("Meus Pedidos", PedidosView.class, VaadinIcon.MONEY.create());
         SideNavItem configuracoesLink = new SideNavItem("Configurações", ConfiguracoesView.class, VaadinIcon.COG.create());
 

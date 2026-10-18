@@ -9,11 +9,13 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import pt.loualmeida.lojavirtual.view.admin.ProdutosView;
-import pt.loualmeida.lojavirtual.view.cliente.CatalogoView;
+
+import pt.loualmeida.lojavirtual.view.cliente.CatalogoPublicoView;
+
 
 
 @Route("publica")
@@ -23,27 +25,22 @@ public class PublicaView extends AppLayout {
 
     private static final String TITULO_APP = "Livraria";
 
-
-
-
     public PublicaView() {
             HorizontalLayout header = createHeader();
             addToNavbar(header);
     }
 
     private HorizontalLayout createHeader() {
-        DrawerToggle toggle = new DrawerToggle();
-
         Image logo = new Image("imagens/logo_for_loualmeida.jpg", TITULO_APP);
         logo.setHeight("50px");
         RouterLink logoLink = new RouterLink();
-        logoLink.setRoute(CatalogoView.class);
+        logoLink.setRoute(CatalogoPublicoView.class);
         logoLink.add(logo);
 
         H1 title = new H1(TITULO_APP);
         title.getStyle().setMargin("0");
         RouterLink brand = new RouterLink();
-        brand.setRoute(CatalogoView.class);
+        brand.setRoute(CatalogoPublicoView.class);
         brand.add(title);
 
 
@@ -68,10 +65,14 @@ public class PublicaView extends AppLayout {
 
         HorizontalLayout userSection = new HorizontalLayout(cartLink,  loginButton);
         userSection.setAlignItems(FlexComponent.Alignment.CENTER);
-        HorizontalLayout header = new HorizontalLayout(toggle, logoLink, brand, userSection);
+        HorizontalLayout brandInfo = new HorizontalLayout(logoLink, brand);
+        brandInfo.setAlignItems(FlexComponent.Alignment.CENTER);
+        HorizontalLayout header = new HorizontalLayout(brandInfo, userSection);
         header.setWidthFull();
-        header.expand(brand);
-        header.getStyle().set("flex-wrap", "wrap");
+        header.expand(brandInfo);
+        header.getStyle().set("display", "flex");
+
+        header.getStyle().set("margin", "10px 20px");
         userSection.getStyle().set("margin-left", "auto");
 
         return header;

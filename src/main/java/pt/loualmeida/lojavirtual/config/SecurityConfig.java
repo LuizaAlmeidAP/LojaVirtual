@@ -29,14 +29,16 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/publica").permitAll()
+                .requestMatchers("/imagens/**").permitAll()
                 .requestMatchers("/login").permitAll()
+                .requestMatchers("/catalogo-publico").permitAll()
                 .requestMatchers("/cadastro").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ADMINISTRADOR")
         );
 
         http.csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**", "/login", "/cadastro", "/publica")
+                .ignoringRequestMatchers("/h2-console/**", "/login", "/cadastro", "/catalogo-publico", "/publica", "/imagens/**")
         );
 
         http.headers(headers -> headers

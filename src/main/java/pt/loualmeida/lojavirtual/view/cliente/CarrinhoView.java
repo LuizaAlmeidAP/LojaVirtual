@@ -78,7 +78,7 @@ public class CarrinhoView extends VerticalLayout {
             try {
                 pagamento();
                 ((PrincipalView) getParent().get()).clearCarrinho();
-                UI.getCurrent().navigate(CatalogoView.class);
+                UI.getCurrent().navigate(CatalogoAutenticadoView.class);
 
             } catch (ObjetoNaoEncontrado ex) {
                 throw new RuntimeException(ex);

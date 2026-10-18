@@ -18,6 +18,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.DownloadHandler;
@@ -32,6 +33,7 @@ import pt.loualmeida.lojavirtual.exception.ObjetoNaoEncontrado;
 import pt.loualmeida.lojavirtual.model.*;
 import pt.loualmeida.lojavirtual.service.*;
 import pt.loualmeida.lojavirtual.view.DialogoView;
+import pt.loualmeida.lojavirtual.view.LoginView;
 import pt.loualmeida.lojavirtual.view.PrincipalView;
 
 import java.io.ByteArrayInputStream;
@@ -41,10 +43,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-@Route(value = "catalogo", layout = PrincipalView.class)
-@RolesAllowed("CLIENTE")
-@PageTitle("Catalogo de Produtos")
-public class CatalogoView extends VerticalLayout {
+
+public abstract class CatalogoView extends VerticalLayout {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(CatalogoView.class);
 
@@ -162,17 +162,22 @@ public class CatalogoView extends VerticalLayout {
     private void inicializaView() {
         organizacaoEspacial();
 
+        VerticalLayout layout = new VerticalLayout();
+        layout.setHeight("100vh");
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         containerProdutos.getStyle().set("display", "grid");
         containerProdutos.getStyle().set("grid-template-columns", "repeat(auto-fill, minmax(250px, 1fr))");
         containerProdutos.getStyle().set("gap", "20px");
+
         containerProdutos.setWidthFull();
+        layout.add(containerProdutos);
 
 
         atualizarLista(null, false);
         HorizontalLayout toolbar = getToolbar();
 
 
-        add(toolbar, containerProdutos);
+        add(toolbar, layout);
     }
 
     private void organizacaoEspacial() {
@@ -269,7 +274,12 @@ public class CatalogoView extends VerticalLayout {
     private void verDetalhes(Produto produto) {
         UI.getCurrent().navigate("produto/" + produto.getId());
     }
+
     private void adicionarAoCarrinho(Produto produto) throws ObjetoNaoEncontrado, DadosInvalidosException {
+        if(!segurancaService.isLoggedIn()){
+            UI.getCurrent().navigate(LoginView.class);
+            return;
+        }
         if(!produtoService.produtoEmEstoque(produto)) {
             DialogoView.aviso(String.format("O produto %s não existe em estoque. Desculpe o transtorno.", produto.getLivro().getTitulo()));
             return;
