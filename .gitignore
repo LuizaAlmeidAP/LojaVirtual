@@ -32,3 +32,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OUTROS ###
+src/main/frontend/generated/
