@@ -1,18 +1,31 @@
-# Loja Virtual
+# Loja Virtual — Livraria
 
-Aplicação de livraria virtual para consulta e venda de livros e outros produtos. A interface é construída com Vaadin, e a aplicação usa Spring Boot para a camada de serviços, persistência e segurança.
+Aplicação web de livraria virtual para consulta e venda de livros e outros produtos, com perfis de **cliente** e **administrador**. A interface é construída com Vaadin e a aplicação usa Spring Boot para a camada de serviços, persistência e segurança.
 
-> **Status:** projeto em desenvolvimento.
+> **Status:** projeto de estudo em desenvolvimento.
 
-Este projeto foi criado com a ajuda da Professora Alessandra Patriarca. Seu objetivo é estudar conceitos de Java e experimentar o desenvolvimento de um projeto mais profissional em comparação com os projetos realizados na faculdade.
+## Sobre o projeto
+
+Este projeto foi criado para aprofundar os conceitos de Java aprendidos na faculdade e praticar uma arquitetura em camadas, indo além dos projetos feitos nas disciplinas. Foi desenvolvido com a orientação de uma professora particular de Java.
+
+## Capturas de tela
+
+<!-- Adicione aqui 2 ou 3 imagens: catálogo público, login e área administrativa -->
+<!-- Exemplo: ![Catálogo público](docs/catalogo.png) -->
 
 ## Funcionalidades
 
-- Catálogo público e catálogo para clientes autenticados.
-- Cadastro e gerenciamento de clientes, produtos, livros e autores.
-- Carrinho de compras e consulta de pedidos.
-- Área administrativa para acompanhar vendas e gerenciar o catálogo e clientes.
-- Autenticação e controle de acesso por perfil (cliente e administrador).
+**Implementado**
+- Catálogo público e catálogo para clientes autenticados
+- Cadastro e gestão de produtos, livros e autores (área administrativa)
+- Filtro de produtos
+- Autenticação e controle de acesso por perfil (cliente e administrador), com Spring Security
+- Carrinho de compras e consulta de pedidos
+
+**Em desenvolvimento**
+- Cadastro de utilizadores (clientes e administradores)
+- Atualização dos testes automatizados da camada de serviços
+- Configurações do utilizador
 
 ## Tecnologias
 
@@ -45,13 +58,22 @@ mvn spring-boot:run
 
 Abra [http://localhost:8080](http://localhost:8080) no navegador. A rota inicial apresenta o catálogo público; as áreas de cliente e administração exigem autenticação.
 
-## Testes
+## Acesso de demonstração
 
-Execute os testes automatizados com:
+Usuários de teste, apenas para ambiente de desenvolvimento:
+
+| Perfil        | Usuário / e-mail | Senha      |
+| ------------- | ---------------- | ---------- |
+| Administrador | [preencher]      | [preencher] |
+| Cliente       | [preencher]      | [preencher] |
+
+## Testes
 
 ```bash
 mvn test
 ```
+
+Os testes cobrem a camada de serviços (`src/test/java`) e estão sendo atualizados após a implementação do frontend, por isso alguns podem falhar neste momento.
 
 ## Gerar pacote de produção
 
@@ -69,10 +91,23 @@ java -jar target/lojavirtual-0.0.1-SNAPSHOT.jar
 
 ## Banco de dados
 
-Por padrão, a aplicação usa H2 em modo arquivo. O banco é criado em `data/lojavirtual.mv.db` e mantido entre execuções. O console do H2 fica disponível em [http://localhost:8080/h2-console](http://localhost:8080/h2-console); a URL JDBC configurada é `jdbc:h2:file:./data/lojavirtual`, com usuário `sa` e senha vazia.
+Por padrão, a aplicação usa H2 em modo arquivo. O banco é criado em `data/lojavirtual.mv.db` e mantido entre execuções (a pasta `data/` não é versionada). O console do H2 fica disponível em [http://localhost:8080/h2-console](http://localhost:8080/h2-console); a URL JDBC é `jdbc:h2:file:./data/lojavirtual`, com usuário `sa` e senha vazia. Essa configuração é apenas para desenvolvimento.
 
 As configurações de conexão e persistência podem ser ajustadas em `src/main/resources/application.properties`.
 
 ## Estrutura do código
 
-O código Java está em `src/main/java/pt/loualmeida/lojavirtual` e está organizado nas áreas `model`, `repository`, `service`, `view`, `config`, `enums` e `exception`. Os testes de serviços estão em `src/test/java`.
+O código Java está em `src/main/java/pt/loualmeida/lojavirtual`:
+
+| Pacote       | Conteúdo                                                                 |
+| ------------ | ------------------------------------------------------------------------ |
+| `model`      | Entidades: `Usuario`, `Cliente`, `Produto`, `Livro`, `Autor`, `Carrinho`, `ItemVenda`, `Venda` |
+| `repository` | Repositórios Spring Data JPA e `ProdutoSpec` (filtros dinâmicos)         |
+| `service`    | Regras de negócio e `SegurancaService`                                   |
+| `view`       | Telas Vaadin, separadas em `admin` e `cliente`, além de login e home     |
+| `config`     | Configuração de segurança (`SecurityConfig`)                             |
+| `enums`      | `Categoria`, `FaixaEtaria`, `Genero`, `Perfil`                           |
+| `exception`  | Exceções de negócio (dados inválidos, estoque indisponível, etc.)        |
+| `utils`      | Utilitários, como `FormatadorUtils`                                      |
+
+Os testes estão em `src/test/java`.
