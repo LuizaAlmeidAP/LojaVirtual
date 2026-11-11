@@ -8,11 +8,6 @@ Aplicação web de livraria virtual para consulta e venda de livros e outros pro
 
 Este projeto foi criado para aprofundar os conceitos de Java aprendidos na faculdade e praticar uma arquitetura em camadas, indo além dos projetos feitos nas disciplinas. Foi desenvolvido com a orientação de uma professora particular de Java.
 
-## Capturas de tela
-
-<!-- Adicione aqui 2 ou 3 imagens: catálogo público, login e área administrativa -->
-<!-- Exemplo: ![Catálogo público](docs/catalogo.png) -->
-
 ## Funcionalidades
 
 **Implementado**
